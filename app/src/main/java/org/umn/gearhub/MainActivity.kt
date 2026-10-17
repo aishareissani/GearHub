@@ -41,14 +41,6 @@ fun SearchPreview() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun GearDetailPreview() {
-    GearHubTheme {
-        GearDetailScreen(gearId = 1, onBack = {}, onRentClick = {})
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
 fun GearDetailRentedPreview() {
     GearHubTheme {
         GearDetailScreen(gearId = 3, onBack = {}, onRentClick = {})

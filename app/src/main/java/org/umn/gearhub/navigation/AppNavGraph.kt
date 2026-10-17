@@ -8,11 +8,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import org.umn.gearhub.data.dummy.DummyGears
 import org.umn.gearhub.ui.screens.home.HomeScreen
 import org.umn.gearhub.ui.screens.search.SearchScreen
 import org.umn.gearhub.ui.screens.detail.GearDetailScreen
-import android.R.attr.type
 
 @Composable
 fun AppNavGraph(modifier: Modifier = Modifier) {
