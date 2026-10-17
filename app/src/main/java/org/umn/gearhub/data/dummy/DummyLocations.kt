@@ -1,8 +1,6 @@
 package org.umn.gearhub.data.dummy
 
 object DummyLocations {
-    val list = listOf(
-        "Gading Serpong",
-        // isi lokasi lain yang ada di Figma
-    )
+    const val DEFAULT = "Gading Serpong"
+    val list: List<String> = DummyGears.list.map { it.location }.distinct()
 }
