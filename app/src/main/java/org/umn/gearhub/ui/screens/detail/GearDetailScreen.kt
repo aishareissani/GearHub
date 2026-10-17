@@ -19,7 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -49,18 +49,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.umn.gearhub.data.dummy.DummyGears
 import org.umn.gearhub.data.model.Gear
 import org.umn.gearhub.ui.theme.GearHubTheme
+import org.umn.gearhub.ui.theme.PillShape
 import org.umn.gearhub.util.formatRupiah
+import org.umn.gearhub.util.initialsOf
 
 private val tabs = listOf("Ringkasan", "Spesifikasi", "Kelengkapan")
 
@@ -85,6 +84,9 @@ fun GearDetailScreen(
 
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var showAvailability by remember { mutableStateOf(false) }
+
+    val priceStyle = MaterialTheme.typography.headlineLarge.toSpanStyle()
+    val perDayStyle = MaterialTheme.typography.bodyLarge.toSpanStyle()
 
     Scaffold(
         modifier = modifier,
@@ -129,10 +131,10 @@ fun GearDetailScreen(
                 ) {
                     Text(
                         text = buildAnnotatedString {
-                            withStyle(SpanStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold)) {
+                            withStyle(priceStyle) {
                                 append(formatRupiah(gear.pricePerDay))
                             }
-                            withStyle(SpanStyle(fontSize = 16.sp, fontWeight = FontWeight.Normal)) {
+                            withStyle(perDayStyle) {
                                 append("/hari")
                             }
                         },
@@ -219,15 +221,16 @@ fun GearDetailScreen(
 private fun ImageHeader(gear: Gear, onBack: () -> Unit) {
     val pageCount = gear.images.size.coerceAtLeast(1)
     val pagerState = rememberPagerState(pageCount = { pageCount })
+    val headerShape = MaterialTheme.shapes.large.copy(
+        topStart = ZeroCornerSize,
+        topEnd = ZeroCornerSize
+    )
 
     Box(
         Modifier
             .fillMaxWidth()
-            .height(320.dp)
-            .background(
-                MaterialTheme.colorScheme.surfaceVariant,
-                RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp)
-            )
+            .height(350.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant, headerShape)
     ) {
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
             gear.images.getOrNull(page)?.let { res ->
@@ -237,7 +240,7 @@ private fun ImageHeader(gear: Gear, onBack: () -> Unit) {
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 48.dp, vertical = 64.dp)
+                        .padding(horizontal = 90.dp, vertical = 64.dp)
                 )
             }
         }
@@ -248,7 +251,7 @@ private fun ImageHeader(gear: Gear, onBack: () -> Unit) {
             color = MaterialTheme.colorScheme.surface,
             modifier = Modifier
                 .statusBarsPadding()
-                .padding(start = 16.dp, top = 8.dp)
+                .padding(start = 8.dp, top = 8.dp)
                 .size(44.dp)
         ) {
             Box(contentAlignment = Alignment.Center) {
@@ -271,7 +274,7 @@ private fun ImageHeader(gear: Gear, onBack: () -> Unit) {
                             .background(
                                 if (active) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
-                                RoundedCornerShape(50)
+                                PillShape
                             )
                     )
                 }
@@ -282,11 +285,7 @@ private fun ImageHeader(gear: Gear, onBack: () -> Unit) {
 
 @Composable
 private fun OwnerRow(gear: Gear) {
-    val initials = gear.ownerName
-        .split(" ")
-        .filter { it.isNotBlank() }
-        .take(2)
-        .joinToString("") { it.first().uppercase() }
+    val initials = initialsOf(gear.ownerName)
 
     Row(
         Modifier
@@ -332,7 +331,7 @@ private fun OwnerRow(gear: Gear) {
 private fun DetailTab(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(50),
+        shape = PillShape,
         color = if (selected) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.surface
     ) {
         Text(
@@ -357,6 +356,6 @@ private fun BulletItem(text: String) {
 @Composable
 private fun GearDetailScreenPreview() {
     GearHubTheme {
-        GearDetailScreen(gearId = 1, onBack = {}, onRentClick = {})
+        GearDetailScreen(gearId = 5, onBack = {}, onRentClick = {})
     }
 }

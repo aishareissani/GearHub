@@ -25,13 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.umn.gearhub.data.model.Gear
 import org.umn.gearhub.util.formatRupiah
 
@@ -41,6 +39,10 @@ fun GearCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val perDayStyle = MaterialTheme.typography.labelSmall
+        .toSpanStyle()
+        .copy(fontWeight = FontWeight.Normal)
+
     Card(
         onClick = onClick,
         modifier = modifier,
@@ -77,7 +79,7 @@ fun GearCard(
                     Text(
                         text = buildAnnotatedString {
                             append(formatRupiah(gear.pricePerDay))
-                            withStyle(SpanStyle(fontSize = 10.sp, fontWeight = FontWeight.Normal)) {
+                            withStyle(perDayStyle) {
                                 append("/hari")
                             }
                         },
@@ -103,6 +105,7 @@ fun GearCard(
             Text(
                 gear.name,
                 style = MaterialTheme.typography.titleSmall,
+                minLines = 2,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
             )

@@ -22,7 +22,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -57,17 +57,22 @@ import org.umn.gearhub.R
 import org.umn.gearhub.data.dummy.DummyGears
 import org.umn.gearhub.data.dummy.DummyLocations
 import org.umn.gearhub.data.model.GearCategory
+import org.umn.gearhub.data.model.User
 import org.umn.gearhub.navigation.Routes
 import org.umn.gearhub.ui.components.BottomNavBar
 import org.umn.gearhub.ui.components.GearCard
 import org.umn.gearhub.ui.theme.GearHubTheme
+import org.umn.gearhub.ui.theme.PillShape
+import org.umn.gearhub.util.initialsOf
 
 @Composable
 fun HomeScreen(
     onGearClick: (Int) -> Unit,
     onSearchClick: () -> Unit,
+    onCategoryClick: (GearCategory) -> Unit,
     onBottomNav: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    currentUser: User? = null
 ) {
     var selectedLocation by rememberSaveable { mutableStateOf(DummyLocations.DEFAULT) }
     var menuExpanded by remember { mutableStateOf(false) }
@@ -78,6 +83,11 @@ fun HomeScreen(
             .ifEmpty { DummyGears.list.sortedBy { it.distanceKm }.take(2) }
     }
     val categories = GearCategory.entries
+    val sheetShape = MaterialTheme.shapes.large.copy(
+        bottomStart = ZeroCornerSize,
+        bottomEnd = ZeroCornerSize
+    )
+    val initials = currentUser?.let { initialsOf(it.name) } ?: "G"
 
     Scaffold(
         modifier = modifier,
@@ -131,7 +141,7 @@ fun HomeScreen(
                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                     Text(
                                         selectedLocation,
-                                        style = MaterialTheme.typography.titleLarge,
+                                        style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.onPrimary
                                     )
                                     Icon(
@@ -160,7 +170,7 @@ fun HomeScreen(
                             onClick = { },
                             shape = MaterialTheme.shapes.medium,
                             color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.3f),
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(40.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
@@ -173,11 +183,11 @@ fun HomeScreen(
                         Surface(
                             shape = MaterialTheme.shapes.medium,
                             color = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(40.dp)
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
-                                    "JD",
+                                    initials,
                                     style = MaterialTheme.typography.titleLarge,
                                     color = MaterialTheme.colorScheme.onPrimary
                                 )
@@ -215,7 +225,7 @@ fun HomeScreen(
                     Row(
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp)
+                            .padding(horizontal = 8.dp)
                             .padding(top = 8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -234,7 +244,7 @@ fun HomeScreen(
                             Spacer(Modifier.height(12.dp))
                             Button(
                                 onClick = onSearchClick,
-                                shape = RoundedCornerShape(50),
+                                shape = PillShape,
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.surface,
                                     contentColor = MaterialTheme.colorScheme.primary
@@ -258,10 +268,7 @@ fun HomeScreen(
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .background(
-                        MaterialTheme.colorScheme.surface,
-                        RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)
-                    )
+                    .background(MaterialTheme.colorScheme.surface, sheetShape)
                     .padding(top = 12.dp, bottom = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(32.dp)
             ) {
@@ -272,7 +279,10 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
                         items(categories) { category ->
-                            CategoryItem(category = category, onClick = onSearchClick)
+                            CategoryItem(
+                                category = category,
+                                onClick = { onCategoryClick(category) }
+                            )
                         }
                     }
                 }
@@ -307,7 +317,7 @@ private fun SectionHeader(title: String, onArrowClick: () -> Unit) {
     ) {
         Text(
             title,
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.weight(1f)
         )
         IconButton(onClick = onArrowClick) {
@@ -340,10 +350,15 @@ private fun CategoryItem(category: GearCategory, onClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true, heightDp = 900)
+@Preview(showBackground = true, heightDp = 800)
 @Composable
 private fun HomeScreenPreview() {
     GearHubTheme {
-        HomeScreen(onGearClick = {}, onSearchClick = {}, onBottomNav = {})
+        HomeScreen(
+            onGearClick = {},
+            onSearchClick = {},
+            onCategoryClick = {},
+            onBottomNav = {}
+        )
     }
 }

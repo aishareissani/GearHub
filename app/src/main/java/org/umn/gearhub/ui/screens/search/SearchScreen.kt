@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -45,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -52,20 +52,21 @@ import androidx.compose.ui.unit.dp
 import org.umn.gearhub.data.dummy.DummyGears
 import org.umn.gearhub.data.dummy.DummyLocations
 import org.umn.gearhub.data.model.GearCategory
-import org.umn.gearhub.data.model.GearStatus
 import org.umn.gearhub.navigation.Routes
 import org.umn.gearhub.ui.components.BottomNavBar
 import org.umn.gearhub.ui.components.GearCard
 import org.umn.gearhub.ui.theme.GearHubTheme
+import org.umn.gearhub.ui.theme.PillShape
 
 @Composable
 fun SearchScreen(
     onGearClick: (Int) -> Unit,
     onBottomNav: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    initialCategory: String? = null
 ) {
     var query by rememberSaveable { mutableStateOf("") }
-    var selectedCategoryName by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedCategoryName by rememberSaveable(initialCategory) { mutableStateOf(initialCategory) }
     var selectedLocation by rememberSaveable { mutableStateOf(DummyLocations.DEFAULT) }
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -96,7 +97,11 @@ fun SearchScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
-                    Text("Pencarian", style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        "Pencarian",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
 
                     Box {
                         Row(
@@ -238,7 +243,7 @@ private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) 
 
     Surface(
         onClick = onClick,
-        shape = RoundedCornerShape(50),
+        shape = PillShape,
         color = container,
         contentColor = content,
         border = BorderStroke(1.dp, borderColor)

@@ -49,7 +49,7 @@ object DummyGears {
         ),
         Gear(
             id = 2,
-            name = "GoPro HERO12 Black",
+            name = "GoPro HERO12 Black Action Camera",
             category = GearCategory.KAMERA,
             pricePerDay = 170_000,
             rating = 4.9,
@@ -286,7 +286,7 @@ object DummyGears {
             rating = 4.6,
             reviewCount = 27,
             distanceKm = 4.5,
-            ownerName = "NIKI",
+            ownerName = "Niki Zefanya",
             location = "Karawaci",
             description = listOf(
                 "Lightweight 3.2 lb Body with 6.6 lb Payload Capacity",

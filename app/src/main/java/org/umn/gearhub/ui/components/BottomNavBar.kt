@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import org.umn.gearhub.navigation.Routes
 
 private data class NavItem(
@@ -40,9 +39,9 @@ private data class NavItem(
 private val items = listOf(
     NavItem(Routes.HOME, "Beranda", Icons.Default.Home, 1f),
     NavItem(Routes.SEARCH, "Pencarian", Icons.Default.Search, 1.1f),
-    NavItem("add_gear", "Tambah gear", Icons.Default.Add, 1.2f),
-    NavItem("activity", "Aktivitas", Icons.Default.History, 1f),
-    NavItem("profile", "Profil", Icons.Default.Person, 0.8f)
+    NavItem(Routes.ADD_GEAR, "Tambah gear", Icons.Default.Add, 1.2f),
+    NavItem(Routes.ACTIVITY, "Aktivitas", Icons.Default.History, 1f),
+    NavItem(Routes.PROFILE, "Profil", Icons.Default.Person, 0.8f)
 )
 
 @Composable
@@ -89,7 +88,7 @@ fun BottomNavBar(
                     )
                     Text(
                         text = item.label,
-                        style = MaterialTheme.typography.labelMedium.copy(fontSize = 12.sp),
+                        style = MaterialTheme.typography.labelMedium,
                         color = color,
                         maxLines = 1,
                         softWrap = false,
