@@ -1,39 +1,51 @@
 package org.umn.gearhub.data.dummy
 
+import org.umn.gearhub.R
 import org.umn.gearhub.data.model.Gear
 import org.umn.gearhub.data.model.GearCategory
-import org.umn.gearhub.data.model.GearStatus
 
 object DummyGears {
     val list = listOf(
         Gear(
             id = 1,
-            name = "FUJIFILM XF8mm F3.5 R WR",
+            name = "FUJIFILM XF 50mm f/2 R WR",
             category = GearCategory.LENSA,
-            pricePerDay = 120_000,
+            pricePerDay = 50_000,
             rating = 4.8,
             reviewCount = 12,
             distanceKm = 13.1,
             ownerName = "Amanda Aliyah",
             location = "BSD City",
             description = listOf(
-                "Lensa ultra-wide 8mm untuk landscape, arsitektur, dan vlog",
-                "Setara 12mm full-frame, sudut pandang sangat luas",
-                "Ringan dan mudah dibawa traveling",
-                "Tahan debu dan cipratan air (weather resistant)"
+                "X-Mount Lens / APS-C Format",
+                "76mm (35mm Equivalent)",
+                "Aperture Range: f/2 to f/16",
+                "One Aspherical ED Element",
+                "Super EBC Coating",
+                "Weather-Sealed Construction",
+                "Rounded 9-Blade Diaphragm"
             ),
             specs = listOf(
-                "APS-C | f/3.5",
-                "12mm (Full-Frame Equivalent)",
-                "Lightweight Ultra-Wide Angle",
-                "Aspherical and Low Dispersion Elements"
+                "Focal Length: 50mm (76mm Equivalent)",
+                "Maximum Aperture: f/2",
+                "Minimum Aperture: f/16",
+                "Lens Mount: FUJIFILM X",
+                "Lens Format: APS-C",
+                "Focus Type: Autofocus",
+                "Minimum Focus Distance: 39 cm",
+                "Weight: 200 g"
             ),
             included = listOf(
-                "FUJIFILM XF 8mm f/3.5 R WR Lens",
-                "Front and Rear Lens Cap",
-                "Lens Hood"
+                "Unit",
+                "UV Filter",
+                "Hood (By Request)",
+                "Bag"
             ),
-            status = GearStatus.TERSEDIA
+            images = listOf(
+                R.drawable.gear_fujifilm_xf_1,
+                R.drawable.gear_fujifilm_xf_2,
+                R.drawable.gear_fujifilm_xf_3,
+            )
         ),
         Gear(
             id = 2,
@@ -74,7 +86,12 @@ object DummyGears {
                 "Charger with USB-C Cable and Adapter",
                 "Carrying Bag"
             ),
-            status = GearStatus.TERSEDIA
+            images = listOf(
+                R.drawable.gear_gopro_hero12_1,
+                R.drawable.gear_gopro_hero12_2,
+                R.drawable.gear_gopro_hero12_3,
+                R.drawable.gear_gopro_hero12_4
+            )
         ),
         Gear(
             id = 3,
@@ -117,7 +134,11 @@ object DummyGears {
                 "Adapter Chargers (2 pcs)",
                 "Carrying Case"
             ),
-            status = GearStatus.DISEWA
+            images = listOf(
+                R.drawable.gear_saramonic_blink500_1,
+                R.drawable.gear_saramonic_blink500_2,
+                R.drawable.gear_saramonic_blink500_3
+            )
         ),
         Gear(
             id = 4,
@@ -156,7 +177,12 @@ object DummyGears {
                 "Light Stand",
                 "Carrying Bag"
             ),
-            status = GearStatus.TERSEDIA
+            images = listOf(
+                R.drawable.gear_godox_sz150r_1,
+                R.drawable.gear_godox_sz150r_2,
+                R.drawable.gear_godox_sz150r_3,
+                R.drawable.gear_godox_sz150r_4
+            )
         ),
         Gear(
             id = 5,
@@ -196,7 +222,11 @@ object DummyGears {
                 "TRS to TRS Audio Cable",
                 "Pouch"
             ),
-            status = GearStatus.TERSEDIA
+            images = listOf(
+                R.drawable.gear_rode_videomic_go2_1,
+                R.drawable.gear_rode_videomic_go2_2,
+                R.drawable.gear_rode_videomic_go2_3
+            )
         ),
         Gear(
             id = 6,
@@ -241,7 +271,12 @@ object DummyGears {
                 "Protective Case",
                 "Pouch"
             ),
-            status = GearStatus.TERSEDIA
+            images = listOf(
+                R.drawable.gear_insta360_x5_1,
+                R.drawable.gear_insta360_x5_2,
+                R.drawable.gear_insta360_x5_3,
+                R.drawable.gear_insta360_x5_4
+            )
         ),
         Gear(
             id = 7,
@@ -290,7 +325,11 @@ object DummyGears {
                 "Adapter Charger and USB-C to USB-C Cable",
                 "Carrying Bag"
             ),
-            status = GearStatus.TERSEDIA
+            images = listOf(
+                R.drawable.gear_dji_rs5_1,
+                R.drawable.gear_dji_rs5_2,
+                R.drawable.gear_dji_rs5_3
+            )
         ),
         Gear(
             id = 8,
@@ -332,7 +371,11 @@ object DummyGears {
                 "Godox Sub-Flash for V1Pro",
                 "Pouch"
             ),
-            status = GearStatus.TERSEDIA
+            images = listOf(
+                R.drawable.gear_godox_v1pro_1,
+                R.drawable.gear_godox_v1pro_2,
+                R.drawable.gear_godox_v1pro_3
+            )
         ),
         Gear(
             id = 9,
@@ -374,7 +417,12 @@ object DummyGears {
                 "Base Grip with Tripod Mount",
                 "Carrying Bag"
             ),
-            status = GearStatus.TERSEDIA
+            images = listOf(
+                R.drawable.gear_instax_mini99_1,
+                R.drawable.gear_instax_mini99_2,
+                R.drawable.gear_instax_mini99_3,
+                R.drawable.gear_instax_mini99_4
+            )
         ),
         Gear(
             id = 10,
@@ -416,7 +464,11 @@ object DummyGears {
                 "Charger",
                 "Carrying Bag"
             ),
-            status = GearStatus.TERSEDIA
+            images = listOf(
+                R.drawable.gear_nikon_z5_1,
+                R.drawable.gear_nikon_z5_2,
+                R.drawable.gear_nikon_z5_3
+            )
         )
     )
 

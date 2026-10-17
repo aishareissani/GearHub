@@ -13,6 +13,7 @@ data class Gear(
     val description: List<String>,
     val specs: List<String>,
     val included: List<String>,
-    val status: GearStatus,
-    val imageRes: Int? = null
-)
+    val images: List<Int> = emptyList()
+) {
+    val imageRes: Int? get() = images.firstOrNull()
+}
