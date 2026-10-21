@@ -1,4 +1,4 @@
-GearHub
+# GearHub
 GearHub adalah aplikasi peer-to-peer (P2P) untuk menyewa dan menyewakan perlengkapan kamera, lensa, audio, dan lighting bagi mahasiswa, freelancer, dan content creator yang membutuhkan peralatan tanpa harus membelinya. Aplikasi ini memiliki fitur login dan daftar, beranda, pencarian dan filter gear, pemilihan lokasi, detail gear, pengajuan sewa, pembayaran, serta ringkasan transaksi.
 
 ![Alur navigasi dan state GearHub](docs/gearhub-flow.gif)
@@ -47,7 +47,7 @@ app/src/main/java/org/umn/gearhub/
 3. Jalankan konfigurasi `app` di emulator atau perangkat Android (minimal Android 8.1, API 27).
 4. Untuk membuat APK: `./gradlew assembleDebug`. Hasilnya ada di `app/build/outputs/apk/debug/app-debug.apk`.
 
-Fitur yang Dikembangkan
+## Fitur yang Dikembangkan
 - Autentikasi: Login dan registrasi
 - Beranda: Menampilkan perlengkapan gear yang tersedia dan informasi lokasi
 - Pencarian: Mencari gear dan memfilter berdasarkan kategori
@@ -56,14 +56,15 @@ Fitur yang Dikembangkan
 - Pembayaran: Memilih metode pembayaran dan melihat ringkasan transaksi
 - UI fitur native: Pilih Lokasi untuk menampilkan dan memilih lokasi gear terdekat (di Beranda dan Pencarian)
 
-Nama kelompok: kebetulan berempat
-Nama anggota:
+## Anggota Kelompok
+Nama kelompok: **kebetulan berempat**
+
 1. Amanda Aliyah (00000135964)
 2. Aisha Reissani Sopyan (00000136172)
 3. Kenny Valent Winalda Sembiring (00000136177)
 4. Vaurolla Az Zahra (00000139045)
 
-Pembagian tugas
+## Pembagian Tugas
 1. Amanda Aliyah (00000135964)
 - Membuat struktur navigasi aplikasi (NavHost, NavController, dan Routes)
 - Mengimplementasikan halaman Login dan Daftar
@@ -94,5 +95,5 @@ Pembagian tugas
 - Mengimplementasikan halaman Sukses dengan ringkasan transaksi
 - Menyiapkan dummy data metode pembayaran dan utilitas tanggal
 
-Sistem Kerja Kelompok
+## Sistem Kerja Kelompok
 Kelompok membagi tugas berdasarkan fitur dan tanggung jawab masing-masing anggota dengan mengikuti alur pengembangan aplikasi GearHub, mulai dari fondasi aplikasi dan autentikasi, tampilan beranda, pencarian dan detail gear, hingga proses penyewaan dan pembayaran. Setiap anggota bertanggung jawab atas implementasi fitur yang telah dibagi. Integrasi dilakukan dengan menyelaraskan struktur navigasi, model data, dan komponen UI agar seluruh fitur dapat berjalan sebagai satu aplikasi. Kelompok juga melakukan koordinasi dan pengecekan bersama untuk memastikan fitur terintegrasi dengan baik.
