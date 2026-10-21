@@ -1,6 +1,15 @@
 GearHub
 GearHub adalah aplikasi peer-to-peer (P2P) untuk menyewa dan menyewakan perlengkapan kamera, lensa, audio, dan lighting bagi mahasiswa, freelancer, dan content creator yang membutuhkan peralatan tanpa harus membelinya. Aplikasi ini memiliki fitur login dan daftar, beranda, pencarian dan filter gear, pemilihan lokasi, detail gear, pengajuan sewa, pembayaran, serta ringkasan transaksi.
 
+Fitur yang Dikembangkan
+- Autentikasi: Login dan registrasi
+- Beranda: Menampilkan perlengkapan gear yang tersedia dan informasi lokasi
+- Pencarian: Mencari gear dan memfilter berdasarkan kategori
+- Detail Gear: Menampilkan informasi gear
+- Ajukan Sewa: Memilih tanggal sewa dan melihat ringkasan biaya
+- Pembayaran: Memilih metode pembayaran dan melihat ringkasan transaksi
+- UI fitur native: Pilih Lokasi untuk menampilkan dan memilih lokasi gear terdekat (di Beranda dan Pencarian)
+
 Nama kelompok: kebetulan berempat
 Nama anggota:
 1. Amanda Aliyah (00000135964)
