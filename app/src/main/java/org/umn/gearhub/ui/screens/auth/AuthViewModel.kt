@@ -20,6 +20,11 @@ class AuthViewModel(private val savedStateHandle: SavedStateHandle) : ViewModel(
         _currentUser.value = user
     }
 
+    fun logout() {
+        savedStateHandle.remove<String>(KEY_EMAIL)
+        _currentUser.value = null
+    }
+
     private companion object {
         const val KEY_EMAIL = "current_user_email"
     }

@@ -16,6 +16,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.umn.gearhub.data.dummy.DummyLocations
+import org.umn.gearhub.ui.screens.activity.ActivityScreen
+import org.umn.gearhub.ui.screens.addgear.AddGearScreen
 import org.umn.gearhub.ui.screens.auth.AuthViewModel
 import org.umn.gearhub.ui.screens.auth.LoginScreen
 import org.umn.gearhub.ui.screens.auth.RegisterScreen
@@ -24,6 +26,7 @@ import org.umn.gearhub.ui.screens.home.HomeScreen
 import org.umn.gearhub.ui.screens.location.LocationScreen
 import org.umn.gearhub.ui.screens.payment.PaymentScreen
 import org.umn.gearhub.ui.screens.payment.SuccessScreen
+import org.umn.gearhub.ui.screens.profile.ProfileScreen
 import org.umn.gearhub.ui.screens.rent.RentScreen
 import org.umn.gearhub.ui.screens.search.SearchScreen
 
@@ -50,13 +53,15 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
     )
 
     val onBottomNav: (String) -> Unit = { route ->
-        if (route == Routes.HOME) {
-            navController.navigate(Routes.HOME) {
+        when (route) {
+            Routes.HOME -> navController.navigate(Routes.HOME) {
                 popUpTo(Routes.HOME) { inclusive = false }
                 launchSingleTop = true
             }
-        } else if (route == Routes.SEARCH) {
-            navController.navigate(Routes.search()) {
+            Routes.SEARCH -> navController.navigate(Routes.search()) { launchSingleTop = true }
+            Routes.ADD_GEAR -> navController.navigate(Routes.ADD_GEAR) { launchSingleTop = true }
+            Routes.ACTIVITY, Routes.PROFILE -> navController.navigate(route) {
+                popUpTo(Routes.HOME) { inclusive = false }
                 launchSingleTop = true
             }
         }
@@ -143,6 +148,37 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
                     navController.navigate(Routes.success(id, pickup, returnDate, methodId)) {
                         popUpTo(Routes.HOME) { inclusive = false }
                         launchSingleTop = true
+                    }
+                }
+            )
+        }
+        composable(Routes.ACTIVITY) {
+            ActivityScreen(
+                onRentalClick = { id -> navController.navigate(Routes.detail(id)) },
+                onBottomNav = onBottomNav
+            )
+        }
+        composable(Routes.PROFILE) {
+            ProfileScreen(
+                currentUser = currentUser,
+                onAddGear = { navController.navigate(Routes.ADD_GEAR) { launchSingleTop = true } },
+                onActivity = { onBottomNav(Routes.ACTIVITY) },
+                onLogout = {
+                    authViewModel.logout()
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+                onBottomNav = onBottomNav
+            )
+        }
+        composable(Routes.ADD_GEAR) {
+            AddGearScreen(
+                ownerName = currentUser?.name ?: "Pengguna GearHub",
+                onBack = { navController.popBackStack() },
+                onPublished = { id ->
+                    navController.navigate(Routes.detail(id)) {
+                        popUpTo(Routes.ADD_GEAR) { inclusive = true }
                     }
                 }
             )
