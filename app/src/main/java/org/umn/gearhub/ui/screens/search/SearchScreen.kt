@@ -23,13 +23,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -44,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,17 +60,18 @@ import org.umn.gearhub.ui.theme.PillShape
 
 @Composable
 fun SearchScreen(
+    selectedLocation: String,
+    onLocationClick: () -> Unit,
     onGearClick: (Int) -> Unit,
     onBottomNav: (String) -> Unit,
     modifier: Modifier = Modifier,
     initialCategory: String? = null
 ) {
+    val focusManager = LocalFocusManager.current
     var query by rememberSaveable { mutableStateOf("") }
     var selectedCategoryName by rememberSaveable(initialCategory) { mutableStateOf(initialCategory) }
-    var selectedLocation by rememberSaveable { mutableStateOf(DummyLocations.DEFAULT) }
-    var menuExpanded by remember { mutableStateOf(false) }
 
-    val selectedCategory = selectedCategoryName?.let { GearCategory.valueOf(it) }
+    val selectedCategory = GearCategory.entries.firstOrNull { it.name == selectedCategoryName }
 
     val results = remember(query, selectedCategoryName, selectedLocation) {
         DummyGears.list
@@ -78,7 +79,10 @@ fun SearchScreen(
                 (selectedCategory == null || gear.category == selectedCategory) &&
                         gear.name.contains(query.trim(), ignoreCase = true)
             }
-            .sortedByDescending { it.location == selectedLocation }
+            .sortedWith(
+                compareByDescending<org.umn.gearhub.data.model.Gear> { it.location == selectedLocation }
+                    .thenBy { it.distanceKm }
+            )
     }
 
     Scaffold(
@@ -103,29 +107,13 @@ fun SearchScreen(
                         fontWeight = FontWeight.Bold
                     )
 
-                    Box {
-                        Row(
-                            modifier = Modifier.clickable { menuExpanded = true },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(selectedLocation, style = MaterialTheme.typography.titleMedium)
-                            Spacer(Modifier.width(8.dp))
-                            Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Ganti lokasi")
-                        }
-                        DropdownMenu(
-                            expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false }
-                        ) {
-                            DummyLocations.list.forEach { loc ->
-                                DropdownMenuItem(
-                                    text = { Text(loc) },
-                                    onClick = {
-                                        selectedLocation = loc
-                                        menuExpanded = false
-                                    }
-                                )
-                            }
-                        }
+                    Row(
+                        modifier = Modifier.clickable(onClick = onLocationClick),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(selectedLocation, style = MaterialTheme.typography.titleMedium)
+                        Spacer(Modifier.width(8.dp))
+                        Icon(Icons.Default.KeyboardArrowDown, contentDescription = "Ganti lokasi")
                     }
                 }
 
@@ -140,6 +128,7 @@ fun SearchScreen(
                         keyboardType = KeyboardType.Text,
                         imeAction = ImeAction.Search
                     ),
+                    keyboardActions = KeyboardActions(onSearch = { focusManager.clearFocus() }),
                     decorationBox = { innerTextField ->
                         Row(
                             modifier = Modifier
@@ -204,7 +193,7 @@ fun SearchScreen(
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("Gear tidak ditemukan", style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.padding(top = 4.dp))
+                        Spacer(Modifier.height(4.dp))
                         Text(
                             "Coba kata kunci atau kategori lain",
                             style = MaterialTheme.typography.bodyMedium,
@@ -260,6 +249,11 @@ private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) 
 @Composable
 private fun SearchScreenPreview() {
     GearHubTheme {
-        SearchScreen(onGearClick = {}, onBottomNav = {})
+        SearchScreen(
+            selectedLocation = DummyLocations.DEFAULT,
+            onLocationClick = {},
+            onGearClick = {},
+            onBottomNav = {}
+        )
     }
 }

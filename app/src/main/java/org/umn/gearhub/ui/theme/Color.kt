@@ -10,7 +10,9 @@ val Yellow = Color(0xFFF5C542)
 val YellowContainer = Color(0xFFFCEBB5)
 val OnYellowContainer = Color(0xFF4A3A00)
 
-val ErrorRed = Color(0xFFD32F2F)
+val Green = Color(0xFF4C9A00)
+
+val ErrorRed = Color(0xFF990000)
 val ErrorContainer = Color(0xFFFAD4D4)
 val OnErrorContainer = Color(0xFF5C0F0F)
 
@@ -19,6 +21,5 @@ val Normal = Color(0xFFFFFFFF)
 val NormalHover = Color(0xFFE6E6E6)
 val NormalActive = Color(0xFFCCCCCC)
 val Dark = Color(0xFFBFBFBF)
-val DarkHover = Color(0xFF999999)
 val Darker = Color(0xFF595959)
 val Black = Color(0xFF000000)

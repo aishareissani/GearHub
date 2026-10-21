@@ -5,9 +5,7 @@ import org.umn.gearhub.data.model.User
 object DummyUsers {
     private val users = mutableListOf(
         User("Jane Doe", "jane.doe@student.umn.ac.id", "password123"),
-        User("Amanda Aliyah", "amanda.aliyah@student.umn.ac.id", "password123"),
-        User("Vaurolla Az Zahra", "vaurolla.azzahra@student.umn.ac.id", "password123"),
-        User("Kenny Valent", "kenny.valent@student.umn.ac.id", "password123")
+        User("William Parker", "william.parker@student.umn.ac.id", "password123"),
     )
 
     fun authenticate(email: String, password: String): User? =

@@ -1,6 +1,7 @@
 package org.umn.gearhub.ui.screens.home
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -32,8 +31,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,14 +38,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,6 +62,8 @@ import org.umn.gearhub.util.initialsOf
 
 @Composable
 fun HomeScreen(
+    selectedLocation: String,
+    onLocationClick: () -> Unit,
     onGearClick: (Int) -> Unit,
     onSearchClick: () -> Unit,
     onCategoryClick: (GearCategory) -> Unit,
@@ -74,9 +71,6 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     currentUser: User? = null
 ) {
-    var selectedLocation by rememberSaveable { mutableStateOf(DummyLocations.DEFAULT) }
-    var menuExpanded by remember { mutableStateOf(false) }
-
     val nearby = remember(selectedLocation) {
         DummyGears.list
             .filter { it.location == selectedLocation }
@@ -101,22 +95,35 @@ fun HomeScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Box(Modifier.fillMaxWidth()) {
-                Box(
-                    Modifier
-                        .align(Alignment.TopEnd)
-                        .offset(x = 80.dp, y = (-40).dp)
-                        .size(220.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.12f))
-                )
-                Box(
-                    Modifier
-                        .align(Alignment.CenterStart)
-                        .offset(x = (-80).dp, y = 60.dp)
-                        .size(200.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f))
-                )
+                val yellow = MaterialTheme.colorScheme.secondary
+                Canvas(Modifier.matchParentSize().clipToBounds()) {
+                    val w = size.width
+                    val h = size.height
+
+                    val bigRadius = w * 0.46f
+                    val bigCenter = Offset(w * 0.92f, h * 0.10f)
+                    drawCircle(
+                        brush = Brush.linearGradient(
+                            colors = listOf(yellow.copy(alpha = 0.55f), yellow.copy(alpha = 0f)),
+                            start = Offset(bigCenter.x, bigCenter.y - bigRadius),
+                            end = Offset(bigCenter.x, bigCenter.y + bigRadius)
+                        ),
+                        radius = bigRadius,
+                        center = bigCenter
+                    )
+
+                    val smallRadius = w * 0.34f
+                    val smallCenter = Offset(w * 0.06f, h * 0.62f)
+                    drawCircle(
+                        brush = Brush.linearGradient(
+                            colors = listOf(yellow.copy(alpha = 0.55f), yellow.copy(alpha = 0f)),
+                            start = Offset(smallCenter.x, smallCenter.y - smallRadius),
+                            end = Offset(smallCenter.x, smallCenter.y + smallRadius)
+                        ),
+                        radius = smallRadius,
+                        center = smallCenter
+                    )
+                }
 
                 Column(
                     Modifier
@@ -131,38 +138,26 @@ fun HomeScreen(
                             modifier = Modifier.size(28.dp)
                         )
                         Spacer(Modifier.width(8.dp))
-                        Box(Modifier.weight(1f)) {
-                            Column(Modifier.clickable { menuExpanded = true }) {
+                        Column(
+                            Modifier
+                                .weight(1f)
+                                .clickable(onClick = onLocationClick)
+                        ) {
+                            Text(
+                                "Lokasi kamu",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    "Lokasi kamu",
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    selectedLocation,
+                                    style = MaterialTheme.typography.titleMedium,
                                     color = MaterialTheme.colorScheme.onPrimary
                                 )
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        selectedLocation,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                    Icon(
-                                        Icons.Default.KeyboardArrowDown, null,
-                                        tint = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                }
-                            }
-                            DropdownMenu(
-                                expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false }
-                            ) {
-                                DummyLocations.list.forEach { loc ->
-                                    DropdownMenuItem(
-                                        text = { Text(loc) },
-                                        onClick = {
-                                            selectedLocation = loc
-                                            menuExpanded = false
-                                        }
-                                    )
-                                }
+                                Icon(
+                                    Icons.Default.KeyboardArrowDown, "Ganti lokasi",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
                             }
                         }
 
@@ -355,6 +350,8 @@ private fun CategoryItem(category: GearCategory, onClick: () -> Unit) {
 private fun HomeScreenPreview() {
     GearHubTheme {
         HomeScreen(
+            selectedLocation = DummyLocations.DEFAULT,
+            onLocationClick = {},
             onGearClick = {},
             onSearchClick = {},
             onCategoryClick = {},

@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.ChatBubbleOutline
 import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -56,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.umn.gearhub.data.dummy.DummyGears
 import org.umn.gearhub.data.model.Gear
+import org.umn.gearhub.ui.components.AvailabilityCalendarDialog
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.ui.theme.PillShape
 import org.umn.gearhub.util.formatRupiah
@@ -200,19 +200,9 @@ fun GearDetailScreen(
     }
 
     if (showAvailability) {
-        AlertDialog(
-            onDismissRequest = { showAvailability = false },
-            confirmButton = {
-                TextButton(onClick = { showAvailability = false }) { Text("Tutup") }
-            },
-            title = { Text("Ketersediaan", style = MaterialTheme.typography.titleLarge) },
-            text = {
-                Text(
-                    "${gear.name} tersedia untuk disewa.",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            },
-            containerColor = MaterialTheme.colorScheme.surface
+        AvailabilityCalendarDialog(
+            gearId = gear.id,
+            onDismiss = { showAvailability = false }
         )
     }
 }
@@ -356,6 +346,6 @@ private fun BulletItem(text: String) {
 @Composable
 private fun GearDetailScreenPreview() {
     GearHubTheme {
-        GearDetailScreen(gearId = 5, onBack = {}, onRentClick = {})
+        GearDetailScreen(gearId = 1, onBack = {}, onRentClick = {})
     }
 }
