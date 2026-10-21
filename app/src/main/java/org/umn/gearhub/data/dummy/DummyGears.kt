@@ -41,15 +41,17 @@ object DummyGears {
                 "Hood (By Request)",
                 "Bag"
             ),
+            availableFrom = DummyBookings.daysFromToday(0),
+            availableUntil = DummyBookings.daysFromToday(60),
             images = listOf(
                 R.drawable.gear_fujifilm_xf_1,
                 R.drawable.gear_fujifilm_xf_2,
-                R.drawable.gear_fujifilm_xf_3,
+                R.drawable.gear_fujifilm_xf_3
             )
         ),
         Gear(
             id = 2,
-            name = "GoPro HERO12 Black Action Camera",
+            name = "GoPro HERO12 Black",
             category = GearCategory.KAMERA,
             pricePerDay = 170_000,
             rating = 4.9,
@@ -86,6 +88,8 @@ object DummyGears {
                 "Charger with USB-C Cable and Adapter",
                 "Carrying Bag"
             ),
+            availableFrom = DummyBookings.daysFromToday(0),
+            availableUntil = DummyBookings.daysFromToday(30),
             images = listOf(
                 R.drawable.gear_gopro_hero12_1,
                 R.drawable.gear_gopro_hero12_2,
@@ -134,6 +138,8 @@ object DummyGears {
                 "Adapter Chargers (2 pcs)",
                 "Carrying Case"
             ),
+            availableFrom = DummyBookings.daysFromToday(3),
+            availableUntil = DummyBookings.daysFromToday(40),
             images = listOf(
                 R.drawable.gear_saramonic_blink500_1,
                 R.drawable.gear_saramonic_blink500_2,
@@ -177,6 +183,8 @@ object DummyGears {
                 "Light Stand",
                 "Carrying Bag"
             ),
+            availableFrom = DummyBookings.daysFromToday(0),
+            availableUntil = DummyBookings.daysFromToday(21),
             images = listOf(
                 R.drawable.gear_godox_sz150r_1,
                 R.drawable.gear_godox_sz150r_2,
@@ -222,6 +230,8 @@ object DummyGears {
                 "TRS to TRS Audio Cable",
                 "Pouch"
             ),
+            availableFrom = DummyBookings.daysFromToday(5),
+            availableUntil = DummyBookings.daysFromToday(25),
             images = listOf(
                 R.drawable.gear_rode_videomic_go2_1,
                 R.drawable.gear_rode_videomic_go2_2,
@@ -271,6 +281,8 @@ object DummyGears {
                 "Protective Case",
                 "Pouch"
             ),
+            availableFrom = DummyBookings.daysFromToday(0),
+            availableUntil = DummyBookings.daysFromToday(45),
             images = listOf(
                 R.drawable.gear_insta360_x5_1,
                 R.drawable.gear_insta360_x5_2,
@@ -286,7 +298,7 @@ object DummyGears {
             rating = 4.6,
             reviewCount = 27,
             distanceKm = 4.5,
-            ownerName = "Niki Zefanya",
+            ownerName = "NIKI",
             location = "Karawaci",
             description = listOf(
                 "Lightweight 3.2 lb Body with 6.6 lb Payload Capacity",
@@ -325,6 +337,8 @@ object DummyGears {
                 "Adapter Charger and USB-C to USB-C Cable",
                 "Carrying Bag"
             ),
+            availableFrom = DummyBookings.daysFromToday(1),
+            availableUntil = DummyBookings.daysFromToday(14),
             images = listOf(
                 R.drawable.gear_dji_rs5_1,
                 R.drawable.gear_dji_rs5_2,
@@ -371,6 +385,8 @@ object DummyGears {
                 "Godox Sub-Flash for V1Pro",
                 "Pouch"
             ),
+            availableFrom = DummyBookings.daysFromToday(0),
+            availableUntil = DummyBookings.daysFromToday(90),
             images = listOf(
                 R.drawable.gear_godox_v1pro_1,
                 R.drawable.gear_godox_v1pro_2,
@@ -417,6 +433,8 @@ object DummyGears {
                 "Base Grip with Tripod Mount",
                 "Carrying Bag"
             ),
+            availableFrom = DummyBookings.daysFromToday(7),
+            availableUntil = DummyBookings.daysFromToday(35),
             images = listOf(
                 R.drawable.gear_instax_mini99_1,
                 R.drawable.gear_instax_mini99_2,
@@ -464,6 +482,8 @@ object DummyGears {
                 "Charger",
                 "Carrying Bag"
             ),
+            availableFrom = DummyBookings.daysFromToday(0),
+            availableUntil = DummyBookings.daysFromToday(30),
             images = listOf(
                 R.drawable.gear_nikon_z5_1,
                 R.drawable.gear_nikon_z5_2,

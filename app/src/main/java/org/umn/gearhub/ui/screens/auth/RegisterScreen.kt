@@ -20,6 +20,7 @@ import org.umn.gearhub.ui.components.AuthSwitchPrompt
 import org.umn.gearhub.ui.components.AuthTextField
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.util.AuthValidator
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun RegisterScreen(
@@ -45,7 +46,7 @@ fun RegisterScreen(
 
     LaunchedEffect(isLoading) {
         if (isLoading) {
-            delay(1200)
+            delay(1200.milliseconds)
             DummyUsers.register(User(name = name, email = email, password = password))
             onRegisterSuccess()
         }

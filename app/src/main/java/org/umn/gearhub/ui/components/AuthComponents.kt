@@ -1,5 +1,6 @@
 package org.umn.gearhub.ui.components
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,12 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -34,9 +33,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import org.umn.gearhub.ui.theme.OnYellowContainer
+import org.umn.gearhub.ui.theme.YellowContainer
 
 @Composable
 fun AuthScaffold(
@@ -50,12 +52,7 @@ fun AuthScaffold(
         bottomStart = ZeroCornerSize,
         bottomEnd = ZeroCornerSize
     )
-    val circleBrush = Brush.verticalGradient(
-        listOf(
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
-            MaterialTheme.colorScheme.secondary.copy(alpha = 0f)
-        )
-    )
+    val yellow = MaterialTheme.colorScheme.secondary
 
     Column(
         modifier = modifier
@@ -69,18 +66,34 @@ fun AuthScaffold(
                 .fillMaxWidth()
                 .clipToBounds()
         ) {
-            Box(
-                Modifier
-                    .offset(x = (-55).dp)
-                    .size(288.dp)
-                    .background(circleBrush, CircleShape)
-            )
-            Box(
-                Modifier
-                    .offset(x = 184.dp, y = 112.dp)
-                    .size(202.dp)
-                    .background(circleBrush, CircleShape)
-            )
+            Canvas(Modifier.matchParentSize()) {
+                val w = size.width
+                val h = size.height
+
+                val bigRadius = w * 0.50f
+                val bigCenter = Offset(w * 0.18f, h * 0.30f)
+                drawCircle(
+                    brush = Brush.linearGradient(
+                        colors = listOf(yellow.copy(alpha = 0.55f), yellow.copy(alpha = 0f)),
+                        start = Offset(bigCenter.x, bigCenter.y - bigRadius),
+                        end = Offset(bigCenter.x, bigCenter.y + bigRadius)
+                    ),
+                    radius = bigRadius,
+                    center = bigCenter
+                )
+
+                val smallRadius = w * 0.34f
+                val smallCenter = Offset(w * 0.86f, h * 0.62f)
+                drawCircle(
+                    brush = Brush.linearGradient(
+                        colors = listOf(yellow.copy(alpha = 0.55f), yellow.copy(alpha = 0f)),
+                        start = Offset(smallCenter.x, smallCenter.y - smallRadius),
+                        end = Offset(smallCenter.x, smallCenter.y + smallRadius)
+                    ),
+                    radius = smallRadius,
+                    center = smallCenter
+                )
+            }
             IconButton(
                 onClick = onBack,
                 modifier = Modifier
@@ -137,17 +150,21 @@ fun AuthButton(
     text: String,
     isLoading: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    useMutedColor: Boolean = false
 ) {
+    val containerColor = if (useMutedColor) YellowContainer else MaterialTheme.colorScheme.secondary
+    val contentColor = if (useMutedColor) OnYellowContainer else MaterialTheme.colorScheme.onSecondary
+
     Button(
         onClick = onClick,
         enabled = !isLoading,
         shape = MaterialTheme.shapes.medium,
         colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.secondary,
-            contentColor = MaterialTheme.colorScheme.onSecondary,
-            disabledContainerColor = MaterialTheme.colorScheme.secondary,
-            disabledContentColor = MaterialTheme.colorScheme.onSecondary
+            containerColor = containerColor,
+            contentColor = contentColor,
+            disabledContainerColor = containerColor,
+            disabledContentColor = contentColor
         ),
         modifier = modifier
             .fillMaxWidth()
@@ -156,7 +173,7 @@ fun AuthButton(
         if (isLoading) {
             CircularProgressIndicator(
                 modifier = Modifier.size(24.dp),
-                color = MaterialTheme.colorScheme.onSecondary,
+                color = contentColor,
                 strokeWidth = 2.dp
             )
         } else {

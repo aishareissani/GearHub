@@ -19,6 +19,7 @@ import org.umn.gearhub.ui.components.AuthSwitchPrompt
 import org.umn.gearhub.ui.components.AuthTextField
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.util.AuthValidator
+import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun LoginScreen(
@@ -41,7 +42,7 @@ fun LoginScreen(
 
     LaunchedEffect(isLoading) {
         if (isLoading) {
-            delay(1200)
+            delay(1200.milliseconds)
             val user = DummyUsers.authenticate(email, password)
             if (user != null) {
                 onLoginSuccess(user)

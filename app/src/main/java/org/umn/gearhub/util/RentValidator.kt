@@ -2,6 +2,8 @@ package org.umn.gearhub.util
 
 object RentValidator {
     const val MAX_DAYS = 14
+    const val PHONE_MIN_LENGTH = 10
+    const val PHONE_MAX_LENGTH = 13
 
     fun validatePickup(pickup: Long?, today: Long): String? = when {
         pickup == null -> "Tanggal pickup wajib dipilih"
@@ -18,5 +20,14 @@ object RentValidator {
             days > MAX_DAYS -> "Durasi sewa maksimal $MAX_DAYS hari"
             else -> null
         }
+    }
+
+    fun validatePhone(phone: String): String? = when {
+        phone.isEmpty() -> "Nomor telepon wajib diisi"
+        !phone.all { it.isDigit() } -> "Nomor telepon hanya boleh berisi angka"
+        !phone.startsWith("08") -> "Nomor telepon harus diawali 08"
+        phone.length !in PHONE_MIN_LENGTH..PHONE_MAX_LENGTH ->
+            "Nomor telepon $PHONE_MIN_LENGTH sampai $PHONE_MAX_LENGTH digit"
+        else -> null
     }
 }

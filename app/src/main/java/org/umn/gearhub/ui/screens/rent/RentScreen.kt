@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,21 +45,34 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
+import org.umn.gearhub.data.dummy.DummyBookings
 import org.umn.gearhub.data.dummy.DummyGears
 import org.umn.gearhub.ui.components.AuthButton
+import org.umn.gearhub.ui.components.AuthTextField
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.util.DateUtils
 import org.umn.gearhub.util.RentValidator
+import org.umn.gearhub.util.formatDateRange
 import org.umn.gearhub.util.formatRupiah
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import kotlin.time.Duration.Companion.milliseconds
+
+private val infoDateFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.forLanguageTag("id-ID"))
+
+private fun LocalDate.formatInfo(): String = format(infoDateFormatter)
 
 @Composable
 fun RentScreen(
     onBack: () -> Unit,
-    onContinue: (Int) -> Unit,
+    onContinue: (Int, Long, Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: RentViewModel = viewModel()
 ) {
@@ -66,9 +80,14 @@ fun RentScreen(
 
     LaunchedEffect(state.isLoading) {
         if (state.isLoading) {
-            delay(1000)
+            delay(1000.milliseconds)
+            val gear = state.gear
+            val pickup = state.pickupMillis
+            val returnDate = state.returnMillis
             viewModel.onLoadingFinished()
-            state.gear?.let { onContinue(it.id) }
+            if (gear != null && pickup != null && returnDate != null) {
+                onContinue(gear.id, pickup, returnDate)
+            }
         }
     }
 
@@ -77,6 +96,7 @@ fun RentScreen(
         onBack = onBack,
         onPickupSelected = viewModel::onPickupSelected,
         onReturnSelected = viewModel::onReturnSelected,
+        onPhoneChange = viewModel::onPhoneChange,
         onSubmit = viewModel::onSubmit,
         modifier = modifier
     )
@@ -88,6 +108,7 @@ fun RentContent(
     onBack: () -> Unit,
     onPickupSelected: (Long) -> Unit,
     onReturnSelected: (Long) -> Unit,
+    onPhoneChange: (String) -> Unit,
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -108,12 +129,14 @@ fun RentContent(
 
     val pickupError = if (state.pickupTouched || state.submitted) state.pickupError else null
     val returnError = if (state.returnTouched || state.submitted) state.returnError else null
+    val phoneError = if (state.phoneTouched || state.submitted) state.phoneError else null
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surface)
             .statusBarsPadding()
+            .imePadding()
     ) {
         Row(
             Modifier
@@ -174,6 +197,11 @@ fun RentContent(
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text("Pilih tanggal", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "Tersedia disewa: ${formatDateRange(gear.availableFrom, gear.availableUntil)}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -190,7 +218,7 @@ fun RentContent(
                         label = "Return",
                         valueMillis = state.returnMillis,
                         error = returnError,
-                        onClick = { showReturnPicker = true },
+                        onClick = { if (state.pickupMillis != null) showReturnPicker = true },
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -201,6 +229,20 @@ fun RentContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Kontak", style = MaterialTheme.typography.titleLarge)
+                AuthTextField(
+                    label = "Nomor telepon",
+                    value = state.phone,
+                    onValueChange = onPhoneChange,
+                    placeholder = "08xxxxxxxxxx",
+                    errorMessage = phoneError,
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Done,
+                    onDone = onSubmit
+                )
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -250,15 +292,25 @@ fun RentContent(
                     style = MaterialTheme.typography.headlineSmall
                 )
             }
-            AuthButton(text = "Lanjut", isLoading = state.isLoading, onClick = onSubmit)
+            AuthButton(
+                text = "Lanjut",
+                isLoading = state.isLoading,
+                useMutedColor = state.phone.isEmpty(),
+                onClick = onSubmit
+            )
         }
     }
 
     if (showPickupPicker) {
         DatePickerSheet(
+            title = "Pilih tanggal pickup",
+            info = "Tanggal abu-abu sudah disewa, di luar jadwal, atau tidak bisa dipakai minimal 1 hari.",
             selectedMillis = state.pickupMillis,
             displayMillis = state.pickupMillis,
-            isSelectable = { it >= state.todayMillis },
+            isSelectable = { millis ->
+                millis >= state.todayMillis &&
+                        DummyBookings.isPickupSelectable(gear.id, DateUtils.toLocalDate(millis))
+            },
             onConfirm = {
                 onPickupSelected(it)
                 showPickupPicker = false
@@ -267,15 +319,30 @@ fun RentContent(
         )
     }
 
-    if (showReturnPicker) {
-        val minReturn = (state.pickupMillis ?: state.todayMillis) + DateUtils.DAY_MILLIS
-        val maxReturn = state.pickupMillis?.let {
-            it + RentValidator.MAX_DAYS * DateUtils.DAY_MILLIS
+    val pickupMillis = state.pickupMillis
+    if (showReturnPicker && pickupMillis != null) {
+        val pickupDate = DateUtils.toLocalDate(pickupMillis)
+        val limit = DummyBookings.returnLimit(gear.id, pickupDate)
+        val info = when {
+            limit == null -> ""
+            limit.blockedBy != null ->
+                "Return maksimal ${limit.maxDate.formatInfo()}. Tanggal ${limit.blockedBy.formatInfo()} sudah disewa orang lain."
+            else ->
+                "Return maksimal ${limit.maxDate.formatInfo()} (batas tanggal tersedia)."
         }
         DatePickerSheet(
+            title = "Pilih tanggal return",
+            info = info,
             selectedMillis = state.returnMillis,
-            displayMillis = state.returnMillis ?: state.pickupMillis,
-            isSelectable = { it >= minReturn && (maxReturn == null || it <= maxReturn) },
+            displayMillis = state.returnMillis ?: pickupMillis,
+            isSelectable = { millis ->
+                millis - pickupMillis <= RentValidator.MAX_DAYS * DateUtils.DAY_MILLIS &&
+                        DummyBookings.isReturnSelectable(
+                            gear.id,
+                            pickupDate,
+                            DateUtils.toLocalDate(millis)
+                        )
+            },
             onConfirm = {
                 onReturnSelected(it)
                 showReturnPicker = false
@@ -349,6 +416,8 @@ private fun SummaryRow(label: String, value: String) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DatePickerSheet(
+    title: String,
+    info: String,
     selectedMillis: Long?,
     displayMillis: Long?,
     isSelectable: (Long) -> Boolean,
@@ -376,7 +445,28 @@ private fun DatePickerSheet(
             TextButton(onClick = onDismiss) { Text("Batal") }
         }
     ) {
-        DatePicker(state = pickerState)
+        DatePicker(
+            state = pickerState,
+            title = {
+                Text(title, modifier = Modifier.padding(start = 24.dp, top = 16.dp))
+            },
+            headline = {
+                Column(
+                    Modifier.padding(start = 24.dp, end = 24.dp, bottom = 12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Text(
+                        pickerState.selectedDateMillis?.let { DateUtils.formatLong(it) } ?: "Belum dipilih",
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                    Text(
+                        info,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        )
     }
 }
 
@@ -390,11 +480,13 @@ private fun RentContentPreview() {
                 gear = DummyGears.list.first(),
                 todayMillis = today,
                 pickupMillis = today + DateUtils.DAY_MILLIS,
-                returnMillis = today + 4 * DateUtils.DAY_MILLIS
+                returnMillis = today + 4 * DateUtils.DAY_MILLIS,
+                phone = "081234567890"
             ),
             onBack = {},
             onPickupSelected = {},
             onReturnSelected = {},
+            onPhoneChange = {},
             onSubmit = {}
         )
     }

@@ -1,6 +1,9 @@
 package org.umn.gearhub.util
 
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneOffset
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -28,6 +31,9 @@ object DateUtils {
         )
         return utcCalendar.timeInMillis
     }
+
+    fun toLocalDate(utcMillis: Long): LocalDate =
+        Instant.ofEpochMilli(utcMillis).atZone(ZoneOffset.UTC).toLocalDate()
 
     fun formatLong(millis: Long): String {
         val dayFormatter = SimpleDateFormat("EEEE, d", indonesia)
