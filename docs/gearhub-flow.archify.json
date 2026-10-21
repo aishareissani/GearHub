@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "GearHub: Navigation Flow & MVVM State",
+    "output": ".archify/architecture-gearhub-flow-20261022-000235/gearhub-flow.html",
+    "quality_profile": "showcase",
+    "animation": "trace",
+    "locale": "en"
+  },
+  "components": [
+    { "id": "register", "type": "frontend", "label": "RegisterScreen", "sublabel": "name / email / password", "pos": [40, 20], "size": [150, 64] },
+    { "id": "location", "type": "frontend", "label": "LocationScreen", "sublabel": "GPS map mockup", "pos": [330, 20], "size": [150, 64], "tag": "native UI" },
+    { "id": "dummy", "type": "database", "label": "Dummy Data", "sublabel": "Gear, Booking, User", "pos": [910, 20], "size": [150, 64], "tag": "data class" },
+
+    { "id": "login", "type": "frontend", "label": "LoginScreen", "sublabel": "start destination", "pos": [40, 200], "size": [150, 64] },
+    { "id": "home", "type": "frontend", "label": "HomeScreen", "sublabel": "categories + gears", "pos": [330, 200], "size": [150, 64] },
+    { "id": "search", "type": "frontend", "label": "SearchScreen", "sublabel": "list + filter", "pos": [620, 200], "size": [150, 64], "tag": "LIST" },
+    { "id": "detail", "type": "frontend", "label": "GearDetailScreen", "sublabel": "gallery + specs", "pos": [910, 200], "size": [150, 64], "tag": "DETAIL" },
+
+    { "id": "authvm", "type": "backend", "label": "AuthViewModel", "sublabel": "currentUser StateFlow", "pos": [40, 380], "size": [150, 64] },
+    { "id": "success", "type": "frontend", "label": "SuccessScreen", "sublabel": "transaction summary", "pos": [330, 380], "size": [150, 64] },
+    { "id": "payment", "type": "frontend", "label": "PaymentScreen", "sublabel": "payment method", "pos": [620, 380], "size": [150, 64] },
+    { "id": "rent", "type": "frontend", "label": "RentScreen", "sublabel": "dates + phone", "pos": [910, 380], "size": [150, 64], "tag": "FORM" },
+
+    { "id": "paymentvm", "type": "backend", "label": "PaymentViewModel", "sublabel": "selected method", "pos": [620, 540], "size": [150, 64] },
+    { "id": "rentvm", "type": "backend", "label": "RentViewModel", "sublabel": "RentUiState + validator", "pos": [910, 540], "size": [150, 64] }
+  ],
+  "connections": [
+    { "id": "login-home", "from": "login", "to": "home", "label": "login OK", "variant": "emphasis" },
+    { "id": "home-search", "from": "home", "to": "search", "label": "?category=", "variant": "emphasis" },
+    { "id": "search-detail", "from": "search", "to": "detail", "label": "detail/{gearId}", "variant": "emphasis" },
+    { "id": "detail-rent", "from": "detail", "to": "rent", "label": "rent/{gearId}", "variant": "emphasis" },
+    { "id": "rent-payment", "from": "rent", "to": "payment", "label": "pickup + return", "variant": "emphasis" },
+    { "id": "payment-success", "from": "payment", "to": "success", "label": "methodId", "variant": "emphasis" },
+    { "id": "success-home", "from": "success", "to": "home", "label": "popUpTo HOME", "variant": "dashed" },
+
+    { "id": "login-register", "from": "login", "to": "register", "label": "daftar", "variant": "dashed" },
+    { "id": "home-location", "from": "home", "to": "location", "label": "pilih lokasi", "variant": "dashed" },
+    { "id": "detail-dummy", "from": "detail", "to": "dummy", "label": "find gearId", "variant": "dashed" },
+    { "id": "login-authvm", "from": "login", "to": "authvm", "label": "login(user)" },
+    { "id": "payment-paymentvm", "from": "payment", "to": "paymentvm", "label": "state" },
+    { "id": "rent-rentvm", "from": "rent", "to": "rentvm", "label": "state" }
+  ],
+  "cards": [
+    { "dot": "cyan", "title": "Navigation", "items": ["NavHost + NavController in AppNavGraph.kt", "Args: gearId (Int), category (String?), pickup/return (Long), methodId (Int)", "ViewModels read gearId via SavedStateHandle"] },
+    { "dot": "emerald", "title": "Theme (Material 3)", "items": ["Custom colorScheme: Blue #005596 + Yellow #F5C542", "Rethink Sans typography, custom Shapes + PillShape"] },
+    { "dot": "amber", "title": "Validation", "items": ["Email: KeyboardType.Email + .ac.id format", "Phone: KeyboardType.Number, digits only, 08…, 10–13", "Required fields block submit, inline error text"] }
+  ]
+}
