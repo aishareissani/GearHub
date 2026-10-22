@@ -16,17 +16,12 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +38,6 @@ import org.umn.gearhub.ui.theme.YellowContainer
 @Composable
 fun AuthScaffold(
     title: String,
-    onBack: () -> Unit,
     fields: @Composable ColumnScope.() -> Unit,
     actions: @Composable ColumnScope.() -> Unit,
     modifier: Modifier = Modifier
@@ -92,18 +86,6 @@ fun AuthScaffold(
                     ),
                     radius = smallRadius,
                     center = smallCenter
-                )
-            }
-            IconButton(
-                onClick = onBack,
-                modifier = Modifier
-                    .statusBarsPadding()
-                    .padding(start = 8.dp, top = 8.dp)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Kembali",
-                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
             Text(
