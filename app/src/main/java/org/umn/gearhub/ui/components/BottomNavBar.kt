@@ -33,15 +33,16 @@ private data class NavItem(
     val route: String,
     val label: String,
     val icon: ImageVector,
-    val weight: Float = 1f
+    val weight: Float = 1f,
+    val enabled: Boolean = true
 )
 
 private val items = listOf(
     NavItem(Routes.HOME, "Beranda", Icons.Default.Home, 1f),
     NavItem(Routes.SEARCH, "Pencarian", Icons.Default.Search, 1.1f),
-    NavItem(Routes.ADD_GEAR, "Tambah gear", Icons.Default.Add, 1.2f),
-    NavItem(Routes.ACTIVITY, "Aktivitas", Icons.Default.History, 1f),
-    NavItem(Routes.PROFILE, "Profil", Icons.Default.Person, 0.8f)
+    NavItem(Routes.ADD_GEAR, "Tambah gear", Icons.Default.Add, 1.2f, enabled = false),
+    NavItem(Routes.ACTIVITY, "Aktivitas", Icons.Default.History, 1f, enabled = false),
+    NavItem(Routes.PROFILE, "Profil", Icons.Default.Person, 0.8f, enabled = false)
 )
 
 @Composable
@@ -64,8 +65,11 @@ fun BottomNavBar(
         ) {
             items.forEach { item ->
                 val selected = currentRoute == item.route
-                val color = if (selected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant
+                val color = when {
+                    selected -> MaterialTheme.colorScheme.primary
+                    item.enabled -> MaterialTheme.colorScheme.onSurfaceVariant
+                    else -> MaterialTheme.colorScheme.outline
+                }
                 val interaction = remember { MutableInteractionSource() }
 
                 Column(
