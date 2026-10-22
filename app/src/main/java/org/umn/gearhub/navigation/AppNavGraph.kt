@@ -1,6 +1,5 @@
 package org.umn.gearhub.navigation
 
-import android.app.Activity
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -8,7 +7,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,7 +28,6 @@ import org.umn.gearhub.ui.screens.search.SearchScreen
 @Composable
 fun AppNavGraph(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
-    val context = LocalContext.current
     val authViewModel: AuthViewModel = viewModel()
     val currentUser by authViewModel.currentUser.collectAsState()
     var selectedLocation by rememberSaveable { mutableStateOf(DummyLocations.DEFAULT) }
@@ -65,7 +62,6 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
     NavHost(navController, startDestination = Routes.LOGIN, modifier = modifier) {
         composable(Routes.LOGIN) {
             LoginScreen(
-                onBack = { (context as? Activity)?.finish() },
                 onLoginSuccess = { user ->
                     authViewModel.login(user)
                     navController.navigate(Routes.HOME) {
@@ -79,7 +75,6 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         }
         composable(Routes.REGISTER) {
             RegisterScreen(
-                onBack = { navController.popBackStack() },
                 onRegisterSuccess = { navController.popBackStack() },
                 onLoginClick = { navController.popBackStack() }
             )

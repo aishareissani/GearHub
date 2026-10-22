@@ -23,7 +23,6 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun LoginScreen(
-    onBack: () -> Unit,
     onLoginSuccess: (User) -> Unit,
     onRegisterClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -63,7 +62,6 @@ fun LoginScreen(
 
     AuthScaffold(
         title = "Login",
-        onBack = onBack,
         modifier = modifier,
         fields = {
             AuthTextField(
@@ -110,6 +108,6 @@ fun LoginScreen(
 @Composable
 private fun LoginScreenPreview() {
     GearHubTheme {
-        LoginScreen(onBack = {}, onLoginSuccess = {}, onRegisterClick = {})
+        LoginScreen(onLoginSuccess = {}, onRegisterClick = {})
     }
 }
