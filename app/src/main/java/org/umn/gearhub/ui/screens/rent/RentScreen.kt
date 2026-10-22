@@ -259,7 +259,7 @@ fun RentContent(
                     )
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        "Deposit akan dikembalikan ke Saldo GearHub maksimal 1x24 jam setelah checkout, jika kondisi gear sesuai saat pengambilan.",
+                        "Deposit akan dikembalikan ke Saldo GearHub maksimal 1x24 jam setelah checkout, jika kondisi gear sesuai saat pengembalian.",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
