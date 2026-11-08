@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -117,7 +118,8 @@ fun ProfileScreen(
                     MenuRow(
                         Icons.AutoMirrored.Filled.Logout, "Keluar",
                         onClick = { confirmLogout = true },
-                        tint = MaterialTheme.colorScheme.error
+                        tint = MaterialTheme.colorScheme.error,
+                        showChevron = false
                     )
                 }
             }
@@ -130,10 +132,13 @@ fun ProfileScreen(
             title = { Text("Keluar dari akun?") },
             text = { Text("Kamu perlu login lagi untuk menyewa gear.") },
             confirmButton = {
-                TextButton(onClick = {
-                    confirmLogout = false
-                    onLogout()
-                }) { Text("Keluar") }
+                TextButton(
+                    onClick = {
+                        confirmLogout = false
+                        onLogout()
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text("Keluar") }
             },
             dismissButton = {
                 TextButton(onClick = { confirmLogout = false }) { Text("Batal") }
@@ -157,7 +162,8 @@ private fun MenuRow(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit,
-    tint: Color = MaterialTheme.colorScheme.onSurface
+    tint: Color = MaterialTheme.colorScheme.onSurface,
+    showChevron: Boolean = true
 ) {
     Row(
         Modifier
@@ -169,10 +175,12 @@ private fun MenuRow(
         Icon(icon, contentDescription = null, tint = tint)
         Spacer(Modifier.width(16.dp))
         Text(label, style = MaterialTheme.typography.bodyLarge, color = tint, modifier = Modifier.weight(1f))
-        Icon(
-            Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        if (showChevron) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 

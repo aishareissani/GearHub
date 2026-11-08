@@ -163,7 +163,7 @@ fun AddGearScreen(
                 AuthTextField(
                     label = "Harga sewa per hari (Rp)",
                     value = price,
-                    onValueChange = { price = it },
+                    onValueChange = { price = it.filter(Char::isDigit) },
                     placeholder = "Contoh: 75000",
                     errorMessage = priceError,
                     keyboardType = KeyboardType.Number
