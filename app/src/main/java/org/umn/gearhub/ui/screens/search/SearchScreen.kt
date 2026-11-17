@@ -54,6 +54,7 @@ import org.umn.gearhub.data.dummy.DummyLocations
 import org.umn.gearhub.data.model.GearCategory
 import org.umn.gearhub.navigation.Routes
 import org.umn.gearhub.ui.components.BottomNavBar
+import org.umn.gearhub.ui.components.CategoryChip
 import org.umn.gearhub.ui.components.GearCard
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.ui.theme.PillShape
@@ -221,27 +222,6 @@ fun SearchScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun CategoryChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    val container = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.surface
-    val content = if (selected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.outline
-    val borderColor = if (selected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.outline
-
-    Surface(
-        onClick = onClick,
-        shape = PillShape,
-        color = container,
-        contentColor = content,
-        border = BorderStroke(1.dp, borderColor)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.titleSmall,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
     }
 }
 

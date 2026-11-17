@@ -5,7 +5,7 @@ import org.umn.gearhub.data.model.Gear
 import org.umn.gearhub.data.model.GearCategory
 
 object DummyGears {
-    val list = listOf(
+    private val gears = mutableListOf(
         Gear(
             id = 1,
             name = "FUJIFILM XF 50mm f/2 R WR",
@@ -492,5 +492,13 @@ object DummyGears {
         )
     )
 
+    val list: List<Gear> get() = gears
+
     fun getById(id: Int): Gear? = list.find { it.id == id }
+
+    fun nextId(): Int = (gears.maxOfOrNull { it.id } ?: 0) + 1
+
+    fun add(gear: Gear) {
+        gears.add(gear)
+    }
 }
