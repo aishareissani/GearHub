@@ -63,7 +63,7 @@ fun BottomNavBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            items.forEach { item ->
+            items.filter { it.enabled }.forEach { item ->
                 val selected = currentRoute == item.route
                 val color = when {
                     selected -> MaterialTheme.colorScheme.primary

@@ -85,9 +85,6 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
-                },
-                onRegisterClick = {
-                    navController.navigate(Routes.REGISTER) { launchSingleTop = true }
                 }
             )
         }

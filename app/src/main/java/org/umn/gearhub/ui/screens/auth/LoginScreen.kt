@@ -24,7 +24,7 @@ import kotlin.time.Duration.Companion.milliseconds
 @Composable
 fun LoginScreen(
     onLoginSuccess: (User) -> Unit,
-    onRegisterClick: () -> Unit,
+    onRegisterClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var email by rememberSaveable { mutableStateOf("") }
@@ -95,11 +95,13 @@ fun LoginScreen(
         },
         actions = {
             AuthButton(text = "Login", isLoading = isLoading, onClick = submit)
-            AuthSwitchPrompt(
-                prompt = "Belum punya akun?",
-                action = "Daftar",
-                onClick = onRegisterClick
-            )
+            if (onRegisterClick != null) {
+                AuthSwitchPrompt(
+                    prompt = "Belum punya akun?",
+                    action = "Daftar",
+                    onClick = onRegisterClick
+                )
+            }
         }
     )
 }
@@ -108,6 +110,6 @@ fun LoginScreen(
 @Composable
 private fun LoginScreenPreview() {
     GearHubTheme {
-        LoginScreen(onLoginSuccess = {}, onRegisterClick = {})
+        LoginScreen(onLoginSuccess = {})
     }
 }
