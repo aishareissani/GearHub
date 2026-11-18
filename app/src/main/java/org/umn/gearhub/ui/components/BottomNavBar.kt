@@ -63,7 +63,7 @@ fun BottomNavBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            items.filter { it.enabled }.forEach { item ->
+            items.forEach { item ->
                 val selected = currentRoute == item.route
                 val color = when {
                     selected -> MaterialTheme.colorScheme.primary
@@ -78,6 +78,7 @@ fun BottomNavBar(
                         .clickable(
                             interactionSource = interaction,
                             indication = null,
+                            enabled = item.enabled,
                             onClick = { onNavigate(item.route) }
                         )
                         .padding(vertical = 4.dp),

@@ -95,13 +95,12 @@ fun LoginScreen(
         },
         actions = {
             AuthButton(text = "Login", isLoading = isLoading, onClick = submit)
-            if (onRegisterClick != null) {
-                AuthSwitchPrompt(
-                    prompt = "Belum punya akun?",
-                    action = "Daftar",
-                    onClick = onRegisterClick
-                )
-            }
+            AuthSwitchPrompt(
+                prompt = "Belum punya akun?",
+                action = "Daftar",
+                onClick = { onRegisterClick?.invoke() },
+                enabled = onRegisterClick != null
+            )
         }
     )
 }

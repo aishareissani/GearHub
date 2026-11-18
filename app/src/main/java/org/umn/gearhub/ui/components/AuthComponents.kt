@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -169,14 +170,16 @@ fun AuthSwitchPrompt(
     prompt: String,
     action: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Text("$prompt ", style = MaterialTheme.typography.bodyMedium)
         Text(
             text = action,
             style = MaterialTheme.typography.bodyMedium.copy(textDecoration = TextDecoration.Underline),
-            modifier = Modifier.clickable(onClick = onClick)
+            color = if (enabled) Color.Unspecified else MaterialTheme.colorScheme.outline,
+            modifier = Modifier.clickable(enabled = enabled, onClick = onClick)
         )
     }
 }
