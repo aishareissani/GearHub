@@ -1,6 +1,5 @@
 package org.umn.gearhub.ui.screens.search
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +31,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,13 +49,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.umn.gearhub.data.dummy.DummyGears
 import org.umn.gearhub.data.dummy.DummyLocations
+import org.umn.gearhub.data.model.GPSLocation
 import org.umn.gearhub.data.model.GearCategory
 import org.umn.gearhub.navigation.Routes
 import org.umn.gearhub.ui.components.BottomNavBar
 import org.umn.gearhub.ui.components.CategoryChip
 import org.umn.gearhub.ui.components.GearCard
 import org.umn.gearhub.ui.theme.GearHubTheme
-import org.umn.gearhub.ui.theme.PillShape
+import org.umn.gearhub.util.gearDistanceKm
+import org.umn.gearhub.util.gearDistanceLabel
 
 @Composable
 fun SearchScreen(
@@ -66,7 +66,9 @@ fun SearchScreen(
     onGearClick: (Int) -> Unit,
     onBottomNav: (String) -> Unit,
     modifier: Modifier = Modifier,
-    initialCategory: String? = null
+    initialCategory: String? = null,
+    activeLocation: GPSLocation? = null,
+    isUsingGPS: Boolean = false
 ) {
     val focusManager = LocalFocusManager.current
     var query by rememberSaveable { mutableStateOf("") }
@@ -74,16 +76,13 @@ fun SearchScreen(
 
     val selectedCategory = GearCategory.entries.firstOrNull { it.name == selectedCategoryName }
 
-    val results = remember(query, selectedCategoryName, selectedLocation) {
+    val results = remember(query, selectedCategoryName, selectedLocation, activeLocation) {
         DummyGears.list
             .filter { gear ->
                 (selectedCategory == null || gear.category == selectedCategory) &&
                         gear.name.contains(query.trim(), ignoreCase = true)
             }
-            .sortedWith(
-                compareByDescending<org.umn.gearhub.data.model.Gear> { it.location == selectedLocation }
-                    .thenBy { it.distanceKm }
-            )
+            .sortedBy { gearDistanceKm(activeLocation, it) }
     }
 
     Scaffold(
@@ -216,7 +215,13 @@ fun SearchScreen(
                             onClick = { onGearClick(gear.id) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .fillMaxHeight()
+                                .fillMaxHeight(),
+                            distanceLabel = gearDistanceLabel(
+                                gear = gear,
+                                selectedLocation = selectedLocation,
+                                activeLocation = activeLocation,
+                                isUsingGPS = isUsingGPS
+                            )
                         )
                     }
                 }

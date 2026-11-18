@@ -54,11 +54,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.umn.gearhub.data.dummy.DummyGears
+import org.umn.gearhub.data.model.GPSLocation
 import org.umn.gearhub.data.model.Gear
 import org.umn.gearhub.ui.components.AvailabilityCalendarDialog
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.ui.theme.PillShape
 import org.umn.gearhub.util.formatRupiah
+import org.umn.gearhub.util.gearDistanceLabel
 import org.umn.gearhub.util.initialsOf
 
 private val tabs = listOf("Ringkasan", "Spesifikasi", "Kelengkapan")
@@ -68,7 +70,10 @@ fun GearDetailScreen(
     gearId: Int,
     onBack: () -> Unit,
     onRentClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    userLocation: GPSLocation? = null,
+    selectedLocation: String = "",
+    isUsingGPS: Boolean = false
 ) {
     val gear = remember(gearId) { DummyGears.getById(gearId) }
 
@@ -163,7 +168,7 @@ fun GearDetailScreen(
                 thickness = 2.dp
             )
 
-            OwnerRow(gear)
+            OwnerRow(gear, userLocation, selectedLocation, isUsingGPS)
 
             HorizontalDivider(
                 Modifier.padding(horizontal = 12.dp),
@@ -274,8 +279,15 @@ private fun ImageHeader(gear: Gear, onBack: () -> Unit) {
 }
 
 @Composable
-private fun OwnerRow(gear: Gear) {
+private fun OwnerRow(
+    gear: Gear,
+    userLocation: GPSLocation?,
+    selectedLocation: String,
+    isUsingGPS: Boolean
+) {
     val initials = initialsOf(gear.ownerName)
+    val distanceLabel = gearDistanceLabel(gear, selectedLocation, userLocation, isUsingGPS)
+    val distanceText = if (distanceLabel == "Di area ini") distanceLabel else "±$distanceLabel"
 
     Row(
         Modifier
@@ -303,7 +315,7 @@ private fun OwnerRow(gear: Gear) {
                 Icon(Icons.Default.LocationOn, null, modifier = Modifier.size(16.dp))
                 Spacer(Modifier.width(4.dp))
                 Text(
-                    "${gear.location} (±${gear.distanceKm.toString().replace('.', ',')} km)",
+                    "${gear.location} ($distanceText)",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
