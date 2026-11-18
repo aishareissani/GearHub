@@ -68,7 +68,7 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
     }
 
     LaunchedEffect(currentUser) {
-        if (currentUser != null) runCatching { RentalRepository.load() }
+        if (currentUser != null) RentalRepository.loadOrFlag()
     }
     var selectedLocation by rememberSaveable { mutableStateOf(DummyLocations.DEFAULT) }
     val gearIdArg = listOf(navArgument("gearId") { type = NavType.IntType })

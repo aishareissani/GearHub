@@ -98,7 +98,7 @@ fun ActivityScreen(
             if (rentals.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        emptyMessage(statuses[selectedTab]),
+                        if (RentalRepository.loadFailed) "Gagal memuat riwayat sewa" else emptyMessage(statuses[selectedTab]),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

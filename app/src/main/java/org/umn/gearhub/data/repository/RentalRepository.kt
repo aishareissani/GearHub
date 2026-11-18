@@ -17,6 +17,9 @@ object RentalRepository {
     var list: List<Rental> by mutableStateOf(emptyList())
         private set
 
+    var loadFailed by mutableStateOf(false)
+        private set
+
     fun byStatus(status: RentalStatus): List<Rental> = list.filter { it.status == status }
 
     fun total(rental: Rental): Int {
@@ -27,10 +30,15 @@ object RentalRepository {
 
     /** Row-level security returns only the signed-in user's rentals. */
     suspend fun load() {
+        loadFailed = false
         list = supabase.from("rentals")
             .select { order("pickup_date", Order.DESCENDING) }
             .decodeList<RentalRow>()
             .map(RentalRow::toRental)
+    }
+
+    suspend fun loadOrFlag() {
+        runCatching { load() }.onFailure { loadFailed = true }
     }
 
     suspend fun create(gearId: Int, pickup: LocalDate, returnDate: LocalDate, methodId: Int) {
@@ -47,5 +55,6 @@ object RentalRepository {
 
     fun clear() {
         list = emptyList()
+        loadFailed = false
     }
 }
