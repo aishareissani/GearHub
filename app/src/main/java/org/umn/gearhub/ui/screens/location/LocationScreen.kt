@@ -1,5 +1,9 @@
 package org.umn.gearhub.ui.screens.location
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,29 +45,50 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
+import androidx.core.content.ContextCompat
 import org.umn.gearhub.data.dummy.DummyLocations
 import org.umn.gearhub.ui.components.AuthButton
 import org.umn.gearhub.ui.theme.GearHubTheme
-import kotlin.time.Duration.Companion.milliseconds
+import org.umn.gearhub.util.isWithinCoverage
+import org.umn.gearhub.util.nearestAreaDistanceKm
+import org.umn.gearhub.util.nearestAreaName
+import java.util.Locale
 
 @Composable
 fun LocationScreen(
     selectedLocation: String,
+    locationState: LocationUiState,
+    onDetect: (granted: Boolean) -> Unit,
     onBack: () -> Unit,
-    onConfirm: (String) -> Unit,
+    onConfirm: (location: String, useGps: Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var pendingLocation by rememberSaveable { mutableStateOf(selectedLocation) }
-    var isDetecting by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
 
-    LaunchedEffect(isDetecting) {
-        if (isDetecting) {
-            delay(1500.milliseconds)
-            pendingLocation = DummyLocations.DEFAULT
-            isDetecting = false
+    var pendingLocation by rememberSaveable { mutableStateOf(selectedLocation) }
+    var pendingUseGps by rememberSaveable { mutableStateOf(locationState.isUsingGPS) }
+    var waitingResult by rememberSaveable { mutableStateOf(false) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { result ->
+        onDetect(result.values.any { it })
+    }
+
+    LaunchedEffect(locationState.fixCount) {
+        if (waitingResult && !locationState.isLoading) {
+            val gps = locationState.userLocation
+            if (locationState.error == null && gps != null) {
+                val area = nearestAreaName(gps)
+                if (area.isNotEmpty()) {
+                    pendingLocation = area
+                    pendingUseGps = true
+                }
+            }
+            waitingResult = false
         }
     }
 
@@ -80,14 +105,19 @@ fun LocationScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Kembali")
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Kembali"
+                )
             }
+
             Text(
                 "Pilih lokasi",
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(start = 8.dp)
             )
         }
+
         HorizontalDivider(
             Modifier.padding(horizontal = 16.dp),
             color = MaterialTheme.colorScheme.surfaceVariant,
@@ -103,36 +133,101 @@ fun LocationScreen(
         ) {
             MapPlaceholder(label = pendingLocation)
 
+            if (pendingUseGps) {
+                locationState.userLocation?.let { gps ->
+                    Text(
+                        "Koordinat: ${"%.5f".format(Locale.US, gps.latitude)}, " +
+                                "${"%.5f".format(Locale.US, gps.longitude)} " +
+                                "(akurasi ±${gps.accuracy.toInt()} m)",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (!isWithinCoverage(gps)) {
+                        Text(
+                            "Posisi GPS kamu di luar jangkauan GearHub " +
+                                    "(±${"%.0f".format(Locale.US, nearestAreaDistanceKm(gps))} km " +
+                                    "dari area terdekat). Jarak dihitung dari $pendingLocation.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
+            locationState.error?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+            }
+
             OutlinedButton(
-                onClick = { if (!isDetecting) isDetecting = true },
+                onClick = {
+                    if (!locationState.isLoading) {
+                        waitingResult = true
+                        val fineGranted = ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.ACCESS_FINE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                        val coarseGranted = ContextCompat.checkSelfPermission(
+                            context, Manifest.permission.ACCESS_COARSE_LOCATION
+                        ) == PackageManager.PERMISSION_GRANTED
+                        if (fineGranted || coarseGranted) {
+                            onDetect(true)
+                        } else {
+                            permissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.ACCESS_FINE_LOCATION,
+                                    Manifest.permission.ACCESS_COARSE_LOCATION
+                                )
+                            )
+                        }
+                    }
+                },
                 shape = MaterialTheme.shapes.medium,
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
             ) {
-                if (isDetecting) {
+                if (locationState.isLoading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         color = MaterialTheme.colorScheme.primary,
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Icon(Icons.Default.MyLocation, null, modifier = Modifier.size(20.dp))
+                    Icon(
+                        Icons.Default.MyLocation,
+                        null,
+                        modifier = Modifier.size(20.dp)
+                    )
                     Spacer(Modifier.width(8.dp))
-                    Text("Gunakan lokasi saya", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Gunakan lokasi saya",
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
 
             Column {
-                Text("Lokasi tersedia", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "Lokasi tersedia",
+                    style = MaterialTheme.typography.titleLarge
+                )
+
                 Spacer(Modifier.height(8.dp))
+
                 DummyLocations.list.forEach { location ->
                     LocationRow(
                         name = location,
                         selected = location == pendingLocation,
-                        onClick = { pendingLocation = location }
+                        onClick = {
+                            pendingLocation = location
+                            pendingUseGps = false
+                        }
                     )
+
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                 }
             }
@@ -147,7 +242,11 @@ fun LocationScreen(
             AuthButton(
                 text = "Konfirmasi lokasi",
                 isLoading = false,
-                onClick = { if (!isDetecting) onConfirm(pendingLocation) }
+                onClick = {
+                    if (!locationState.isLoading) {
+                        onConfirm(pendingLocation, pendingUseGps)
+                    }
+                }
             )
         }
     }
@@ -170,6 +269,7 @@ private fun MapPlaceholder(label: String) {
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
         )
+
         Box(
             Modifier
                 .align(Alignment.BottomStart)
@@ -178,23 +278,30 @@ private fun MapPlaceholder(label: String) {
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.18f))
         )
+
         Column(
             Modifier.align(Alignment.Center),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Icon(
-                Icons.Default.LocationOn, null,
+                Icons.Default.LocationOn,
+                null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(56.dp)
             )
+
             Text(label, style = MaterialTheme.typography.titleMedium)
         }
     }
 }
 
 @Composable
-private fun LocationRow(name: String, selected: Boolean, onClick: () -> Unit) {
+private fun LocationRow(
+    name: String,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
     Row(
         Modifier
             .fillMaxWidth()
@@ -203,20 +310,28 @@ private fun LocationRow(name: String, selected: Boolean, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            Icons.Default.LocationOn, null,
-            tint = if (selected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
+            Icons.Default.LocationOn,
+            null,
+            tint = if (selected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
             modifier = Modifier.size(24.dp)
         )
+
         Spacer(Modifier.width(12.dp))
+
         Text(
             name,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f)
         )
+
         if (selected) {
             Icon(
-                Icons.Default.Check, "Dipilih",
+                Icons.Default.Check,
+                "Dipilih",
                 tint = MaterialTheme.colorScheme.primary
             )
         }
@@ -229,8 +344,10 @@ private fun LocationScreenPreview() {
     GearHubTheme {
         LocationScreen(
             selectedLocation = DummyLocations.DEFAULT,
+            locationState = LocationUiState(),
+            onDetect = {},
             onBack = {},
-            onConfirm = {}
+            onConfirm = { _, _ -> }
         )
     }
 }

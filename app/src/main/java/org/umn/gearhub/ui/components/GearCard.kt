@@ -37,7 +37,8 @@ import org.umn.gearhub.util.formatRupiah
 fun GearCard(
     gear: Gear,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    distanceLabel: String? = null
 ) {
     val perDayStyle = MaterialTheme.typography.labelSmall
         .toSpanStyle()
@@ -116,8 +117,23 @@ fun GearCard(
                     " ${gear.location}",
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
+                if (distanceLabel != null) {
+                    val shown = if (distanceLabel.firstOrNull()?.isDigit() == true) {
+                        "±$distanceLabel"
+                    } else {
+                        distanceLabel
+                    }
+                    Text(
+                        " ($shown)",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        softWrap = false
+                    )
+                }
             }
         }
     }
