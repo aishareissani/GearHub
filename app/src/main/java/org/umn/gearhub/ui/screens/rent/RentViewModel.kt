@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import org.umn.gearhub.data.dummy.DummyBookings
-import org.umn.gearhub.data.dummy.DummyGears
+import org.umn.gearhub.data.repository.BookingRepository
+import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.data.model.Gear
 import org.umn.gearhub.util.DateUtils
 import org.umn.gearhub.util.RentValidator
@@ -41,9 +41,9 @@ data class RentUiState(
             val start = DateUtils.toLocalDate(pickup)
             val end = DateUtils.toLocalDate(returnDate)
             return when {
-                !DummyBookings.isWithinOwnerSchedule(gearId, start, end) ->
+                !BookingRepository.isWithinOwnerSchedule(gearId, start, end) ->
                     "Di luar tanggal tersedia"
-                !DummyBookings.isReturnSelectable(gearId, start, end) ->
+                !BookingRepository.isReturnSelectable(gearId, start, end) ->
                     "Rentang tanggal bertabrakan dengan sewa lain"
                 else -> null
             }
@@ -77,7 +77,7 @@ class RentViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
         RentUiState(
-            gear = DummyGears.getById(gearId),
+            gear = GearRepository.getById(gearId),
             todayMillis = DateUtils.todayUtcMillis()
         )
     )
@@ -88,7 +88,7 @@ class RentViewModel(savedStateHandle: SavedStateHandle) : ViewModel() {
             val resetReturn = state.returnMillis?.let {
                 it <= millis ||
                         (it - millis) / DateUtils.DAY_MILLIS > RentValidator.MAX_DAYS ||
-                        !DummyBookings.isReturnSelectable(
+                        !BookingRepository.isReturnSelectable(
                             gearId,
                             DateUtils.toLocalDate(millis),
                             DateUtils.toLocalDate(it)

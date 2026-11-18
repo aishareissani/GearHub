@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -39,8 +38,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.umn.gearhub.data.dummy.DummyGears
-import org.umn.gearhub.data.dummy.DummyRentals
+import org.umn.gearhub.data.repository.GearRepository
+import org.umn.gearhub.data.repository.RentalRepository
 import org.umn.gearhub.data.model.Rental
 import org.umn.gearhub.data.model.RentalStatus
 import org.umn.gearhub.navigation.Routes
@@ -60,7 +59,7 @@ fun ActivityScreen(
 ) {
     val statuses = RentalStatus.entries
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
-    val rentals = remember(selectedTab) { DummyRentals.byStatus(statuses[selectedTab]) }
+    val rentals = RentalRepository.byStatus(statuses[selectedTab])
 
     Scaffold(
         modifier = modifier,
@@ -89,7 +88,7 @@ fun ActivityScreen(
                         onClick = { selectedTab = index },
                         text = {
                             Text(
-                                "${status.label} (${DummyRentals.byStatus(status).size})",
+                                "${status.label} (${RentalRepository.byStatus(status).size})",
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
@@ -126,7 +125,7 @@ private fun emptyMessage(status: RentalStatus) = when (status) {
 
 @Composable
 private fun RentalCard(rental: Rental, onClick: () -> Unit) {
-    val gear = DummyGears.getById(rental.gearId) ?: return
+    val gear = GearRepository.getById(rental.gearId) ?: return
     Card(
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
@@ -165,7 +164,7 @@ private fun RentalCard(rental: Rental, onClick: () -> Unit) {
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        formatRupiah(DummyRentals.total(rental)),
+                        formatRupiah(RentalRepository.total(rental)),
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.weight(1f)
                     )

@@ -40,7 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.umn.gearhub.data.dummy.DummyRentals
+import org.umn.gearhub.data.repository.RentalRepository
 import org.umn.gearhub.data.model.User
 import org.umn.gearhub.navigation.Routes
 import org.umn.gearhub.ui.components.BottomNavBar
@@ -101,7 +101,7 @@ fun ProfileScreen(
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                StatTile("Total sewa", DummyRentals.list.size.toString(), Modifier.weight(1f))
+                StatTile("Total sewa", RentalRepository.list.size.toString(), Modifier.weight(1f))
                 StatTile("Status akun", "Mahasiswa", Modifier.weight(1f))
             }
 
@@ -189,7 +189,7 @@ private fun MenuRow(
 private fun ProfileScreenPreview() {
     GearHubTheme {
         ProfileScreen(
-            currentUser = User("Jane Doe", "jane.doe@student.umn.ac.id", ""),
+            currentUser = User("Jane Doe", "jane.doe@student.umn.ac.id"),
             onAddGear = {}, onActivity = {}, onLogout = {}, onBottomNav = {}
         )
     }

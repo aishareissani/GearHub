@@ -23,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -32,8 +33,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.umn.gearhub.data.dummy.DummyBookings
-import org.umn.gearhub.data.dummy.DummyGears
+import kotlinx.coroutines.launch
+import org.umn.gearhub.data.repository.BookingRepository
+import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.data.dummy.DummyLocations
 import org.umn.gearhub.data.model.Gear
 import org.umn.gearhub.data.model.GearCategory
@@ -58,6 +60,9 @@ fun AddGearScreen(
     var description by rememberSaveable { mutableStateOf("") }
     var included by rememberSaveable { mutableStateOf("") }
     var submitted by rememberSaveable { mutableStateOf(false) }
+    var isPublishing by rememberSaveable { mutableStateOf(false) }
+    var publishError by rememberSaveable { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     val category = categoryName?.let { GearCategory.valueOf(it) }
 
@@ -71,7 +76,7 @@ fun AddGearScreen(
     val locationError = if (submitted) AddGearValidator.validateLocation(location) else null
 
     val priceGuide = category?.let { cat ->
-        val prices = DummyGears.list.filter { it.category == cat }.map { it.pricePerDay }
+        val prices = GearRepository.list.filter { it.category == cat }.map { it.pricePerDay }
         if (prices.isEmpty()) null
         else "Harga wajar ${cat.label}: ${formatRupiah(prices.min())} – ${formatRupiah(prices.max())}/hari"
     }
@@ -87,9 +92,9 @@ fun AddGearScreen(
             AddGearValidator.validateIncluded(included)
         ).all { it == null }
         val pickupLocation = location
-        if (isValid && category != null && pickupLocation != null) {
+        if (isValid && category != null && pickupLocation != null && !isPublishing) {
             val gear = Gear(
-                id = DummyGears.nextId(),
+                id = 0,
                 name = name.trim(),
                 category = category,
                 pricePerDay = price.toInt(),
@@ -101,11 +106,17 @@ fun AddGearScreen(
                 description = listOf(description.trim()),
                 specs = emptyList(),
                 included = AddGearValidator.splitItems(included),
-                availableFrom = DummyBookings.daysFromToday(0),
-                availableUntil = DummyBookings.daysFromToday(60)
+                availableFrom = BookingRepository.daysFromToday(0),
+                availableUntil = BookingRepository.daysFromToday(60)
             )
-            DummyGears.add(gear)
-            onPublished(gear.id)
+            isPublishing = true
+            publishError = null
+            scope.launch {
+                runCatching { GearRepository.add(gear) }
+                    .onSuccess { onPublished(it.id) }
+                    .onFailure { publishError = "Gagal menerbitkan gear. Coba lagi." }
+                isPublishing = false
+            }
         }
     }
 
@@ -204,9 +215,17 @@ fun AddGearScreen(
             )
         }
 
+        publishError?.let {
+            Text(
+                it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
         AuthButton(
             text = "Terbitkan gear",
-            isLoading = false,
+            isLoading = isPublishing,
             onClick = submit,
             modifier = Modifier
                 .padding(16.dp)

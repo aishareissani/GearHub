@@ -51,8 +51,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
-import org.umn.gearhub.data.dummy.DummyBookings
-import org.umn.gearhub.data.dummy.DummyGears
+import org.umn.gearhub.data.repository.BookingRepository
+import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.ui.components.AuthButton
 import org.umn.gearhub.ui.components.AuthTextField
 import org.umn.gearhub.ui.theme.GearHubTheme
@@ -309,7 +309,7 @@ fun RentContent(
             displayMillis = state.pickupMillis,
             isSelectable = { millis ->
                 millis >= state.todayMillis &&
-                        DummyBookings.isPickupSelectable(gear.id, DateUtils.toLocalDate(millis))
+                        BookingRepository.isPickupSelectable(gear.id, DateUtils.toLocalDate(millis))
             },
             onConfirm = {
                 onPickupSelected(it)
@@ -322,7 +322,7 @@ fun RentContent(
     val pickupMillis = state.pickupMillis
     if (showReturnPicker && pickupMillis != null) {
         val pickupDate = DateUtils.toLocalDate(pickupMillis)
-        val limit = DummyBookings.returnLimit(gear.id, pickupDate)
+        val limit = BookingRepository.returnLimit(gear.id, pickupDate)
         val info = when {
             limit == null -> ""
             limit.blockedBy != null ->
@@ -337,7 +337,7 @@ fun RentContent(
             displayMillis = state.returnMillis ?: pickupMillis,
             isSelectable = { millis ->
                 millis - pickupMillis <= RentValidator.MAX_DAYS * DateUtils.DAY_MILLIS &&
-                        DummyBookings.isReturnSelectable(
+                        BookingRepository.isReturnSelectable(
                             gear.id,
                             pickupDate,
                             DateUtils.toLocalDate(millis)
@@ -477,7 +477,7 @@ private fun RentContentPreview() {
     GearHubTheme {
         RentContent(
             state = RentUiState(
-                gear = DummyGears.list.first(),
+                gear = GearRepository.list.first(),
                 todayMillis = today,
                 pickupMillis = today + DateUtils.DAY_MILLIS,
                 returnMillis = today + 4 * DateUtils.DAY_MILLIS,

@@ -49,7 +49,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.umn.gearhub.R
-import org.umn.gearhub.data.dummy.DummyGears
+import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.data.dummy.DummyLocations
 import org.umn.gearhub.data.model.GearCategory
 import org.umn.gearhub.data.model.User
@@ -72,9 +72,9 @@ fun HomeScreen(
     currentUser: User? = null
 ) {
     val nearby = remember(selectedLocation) {
-        DummyGears.list
+        GearRepository.list
             .filter { it.location == selectedLocation }
-            .ifEmpty { DummyGears.list.sortedBy { it.distanceKm }.take(2) }
+            .ifEmpty { GearRepository.list.sortedBy { it.distanceKm }.take(2) }
     }
     val categories = GearCategory.entries
     val sheetShape = MaterialTheme.shapes.large.copy(

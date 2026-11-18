@@ -1,7 +1,19 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
+
+val localProperties = Properties().apply {
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(::load)
+}
+
+// The publishable key is safe to ship in the client; RLS policies guard the data.
+fun supabaseConfig(key: String, default: String): String =
+    "\"" + (localProperties.getProperty(key) ?: default) + "\""
+
 
 android {
     namespace = "org.umn.gearhub"
@@ -17,6 +29,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "SUPABASE_URL", supabaseConfig("supabase.url", "https://giimgworaowkgnvtyhsc.supabase.co"))
+        buildConfigField("String", "SUPABASE_KEY", supabaseConfig("supabase.key", "sb_publishable_e-RLrZ0w-FMuz3BQKhFM1A_XIxXKD3m"))
     }
 
     buildTypes {
@@ -34,6 +49,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -50,6 +66,10 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.auth)
+    implementation(libs.ktor.client.okhttp)
 
     testImplementation(libs.junit)
 

@@ -53,7 +53,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.umn.gearhub.data.dummy.DummyGears
+import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.data.model.Gear
 import org.umn.gearhub.ui.components.AvailabilityCalendarDialog
 import org.umn.gearhub.ui.theme.GearHubTheme
@@ -70,7 +70,7 @@ fun GearDetailScreen(
     onRentClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val gear = remember(gearId) { DummyGears.getById(gearId) }
+    val gear = remember(gearId) { GearRepository.getById(gearId) }
 
     if (gear == null) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
