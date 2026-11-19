@@ -71,6 +71,7 @@ fun LocationScreen(
     var pendingLocation by rememberSaveable { mutableStateOf(selectedLocation) }
     var pendingUseGps by rememberSaveable { mutableStateOf(locationState.isUsingGPS) }
     var waitingResult by rememberSaveable { mutableStateOf(false) }
+    var outOfCoverage by rememberSaveable { mutableStateOf(false) }
 
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -82,10 +83,17 @@ fun LocationScreen(
         if (waitingResult && !locationState.isLoading) {
             val gps = locationState.userLocation
             if (locationState.error == null && gps != null) {
-                val area = nearestAreaName(gps)
-                if (area.isNotEmpty()) {
-                    pendingLocation = area
-                    pendingUseGps = true
+                if (isWithinCoverage(gps)) {
+                    val area = nearestAreaName(gps)
+                    if (area.isNotEmpty()) {
+                        pendingLocation = area
+                        pendingUseGps = true
+                        outOfCoverage = false
+                    }
+                } else {
+                    pendingLocation = DummyLocations.DEFAULT
+                    pendingUseGps = false
+                    outOfCoverage = true
                 }
             }
             waitingResult = false
@@ -142,15 +150,18 @@ fun LocationScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    if (!isWithinCoverage(gps)) {
-                        Text(
-                            "Posisi GPS kamu di luar jangkauan GearHub " +
-                                    "(±${"%.0f".format(Locale.US, nearestAreaDistanceKm(gps))} km " +
-                                    "dari area terdekat). Jarak dihitung dari $pendingLocation.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                }
+            }
+
+            if (outOfCoverage) {
+                locationState.userLocation?.let { gps ->
+                    Text(
+                        "Posisi GPS kamu di luar jangkauan GearHub " +
+                                "(±${"%.0f".format(Locale.US, nearestAreaDistanceKm(gps))} km " +
+                                "dari area terdekat). Lokasi dikembalikan ke ${DummyLocations.DEFAULT}.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
 
@@ -225,6 +236,7 @@ fun LocationScreen(
                         onClick = {
                             pendingLocation = location
                             pendingUseGps = false
+                            outOfCoverage = false
                         }
                     )
 
