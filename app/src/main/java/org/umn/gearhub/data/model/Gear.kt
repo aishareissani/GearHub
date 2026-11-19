@@ -17,7 +17,9 @@ data class Gear(
     val included: List<String>,
     val availableFrom: LocalDate,
     val availableUntil: LocalDate,
-    val images: List<Int> = emptyList()
+    val images: List<Int> = emptyList(),
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0
 ) {
     val imageRes: Int? get() = images.firstOrNull()
 }

@@ -70,6 +70,7 @@ dependencies {
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.auth)
     implementation(libs.ktor.client.okhttp)
+    implementation(libs.play.services.location)
 
     testImplementation(libs.junit)
 

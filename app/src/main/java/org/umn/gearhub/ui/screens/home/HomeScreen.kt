@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import org.umn.gearhub.R
 import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.data.dummy.DummyLocations
+import org.umn.gearhub.data.model.GPSLocation
 import org.umn.gearhub.data.model.GearCategory
 import org.umn.gearhub.data.model.User
 import org.umn.gearhub.navigation.Routes
@@ -58,6 +59,8 @@ import org.umn.gearhub.ui.components.BottomNavBar
 import org.umn.gearhub.ui.components.GearCard
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.ui.theme.PillShape
+import org.umn.gearhub.util.gearDistanceKm
+import org.umn.gearhub.util.gearDistanceLabel
 import org.umn.gearhub.util.initialsOf
 
 @Composable
@@ -69,12 +72,14 @@ fun HomeScreen(
     onCategoryClick: (GearCategory) -> Unit,
     onBottomNav: (String) -> Unit,
     modifier: Modifier = Modifier,
-    currentUser: User? = null
+    currentUser: User? = null,
+    activeLocation: GPSLocation? = null,
+    isUsingGPS: Boolean = false
 ) {
-    val nearby = remember(selectedLocation) {
+    val nearby = remember(selectedLocation, activeLocation) {
         GearRepository.list
-            .filter { it.location == selectedLocation }
-            .ifEmpty { GearRepository.list.sortedBy { it.distanceKm }.take(2) }
+            .sortedBy { gearDistanceKm(activeLocation, it) }
+            .take(6)
     }
     val categories = GearCategory.entries
     val sheetShape = MaterialTheme.shapes.large.copy(
@@ -144,7 +149,7 @@ fun HomeScreen(
                                 .clickable(onClick = onLocationClick)
                         ) {
                             Text(
-                                "Lokasi kamu",
+                                "Lokasi pencarian",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
@@ -292,7 +297,13 @@ fun HomeScreen(
                             GearCard(
                                 gear = gear,
                                 onClick = { onGearClick(gear.id) },
-                                modifier = Modifier.width(168.dp)
+                                modifier = Modifier.width(168.dp),
+                                distanceLabel = gearDistanceLabel(
+                                    gear = gear,
+                                    selectedLocation = selectedLocation,
+                                    activeLocation = activeLocation,
+                                    isUsingGPS = isUsingGPS
+                                )
                             )
                         }
                     }

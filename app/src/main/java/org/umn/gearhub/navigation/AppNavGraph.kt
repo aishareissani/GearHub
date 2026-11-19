@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -39,16 +40,20 @@ import org.umn.gearhub.ui.screens.auth.RegisterScreen
 import org.umn.gearhub.ui.screens.detail.GearDetailScreen
 import org.umn.gearhub.ui.screens.home.HomeScreen
 import org.umn.gearhub.ui.screens.location.LocationScreen
+import org.umn.gearhub.ui.screens.location.LocationViewModel
 import org.umn.gearhub.ui.screens.payment.PaymentScreen
 import org.umn.gearhub.ui.screens.payment.SuccessScreen
 import org.umn.gearhub.ui.screens.profile.ProfileScreen
 import org.umn.gearhub.ui.screens.rent.RentScreen
 import org.umn.gearhub.ui.screens.search.SearchScreen
+import org.umn.gearhub.util.activeLocationOf
+import org.umn.gearhub.util.isGpsActive
 
 @Composable
 fun AppNavGraph(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     val authViewModel: AuthViewModel = viewModel()
+    val locationViewModel: LocationViewModel = viewModel()
     val currentUser by authViewModel.currentUser.collectAsState()
     var startRoute by remember { mutableStateOf<String?>(null) }
     var loadFailed by remember { mutableStateOf(false) }
@@ -70,7 +75,15 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
     LaunchedEffect(currentUser) {
         if (currentUser != null) RentalRepository.loadOrFlag()
     }
+    val locationState by locationViewModel.uiState.collectAsState()
+    val context = LocalContext.current
     var selectedLocation by rememberSaveable { mutableStateOf(DummyLocations.DEFAULT) }
+    val gpsActive = isGpsActive(locationState.userLocation, locationState.isUsingGPS)
+    val activeLocation = activeLocationOf(
+        selectedLocation = selectedLocation,
+        userLocation = locationState.userLocation,
+        isUsingGPS = locationState.isUsingGPS
+    )
     val gearIdArg = listOf(navArgument("gearId") { type = NavType.IntType })
     val paymentArgs = listOf(
         navArgument("gearId") { type = NavType.IntType },
@@ -131,6 +144,8 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
             HomeScreen(
                 currentUser = currentUser,
                 selectedLocation = selectedLocation,
+                activeLocation = activeLocation,
+                isUsingGPS = gpsActive,
                 onLocationClick = {
                     navController.navigate(Routes.LOCATION) { launchSingleTop = true }
                 },
@@ -145,9 +160,18 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         composable(Routes.LOCATION) {
             LocationScreen(
                 selectedLocation = selectedLocation,
+                locationState = locationState,
+                onDetect = { granted ->
+                    if (granted) {
+                        locationViewModel.detect(context)
+                    } else {
+                        locationViewModel.onPermissionDenied()
+                    }
+                },
                 onBack = { navController.popBackStack() },
-                onConfirm = { location ->
+                onConfirm = { location, useGps ->
                     selectedLocation = location
+                    locationViewModel.setUsingGPS(useGps)
                     navController.popBackStack()
                 }
             )
@@ -155,6 +179,8 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         composable(Routes.SEARCH_PATTERN, categoryArg) { entry ->
             SearchScreen(
                 selectedLocation = selectedLocation,
+                activeLocation = activeLocation,
+                isUsingGPS = gpsActive,
                 onLocationClick = {
                     navController.navigate(Routes.LOCATION) { launchSingleTop = true }
                 },
@@ -168,7 +194,10 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
             GearDetailScreen(
                 gearId = gearId,
                 onBack = { navController.popBackStack() },
-                onRentClick = { id -> navController.navigate(Routes.rent(id)) }
+                onRentClick = { id -> navController.navigate(Routes.rent(id)) },
+                userLocation = activeLocation,
+                selectedLocation = selectedLocation,
+                isUsingGPS = gpsActive
             )
         }
         composable(Routes.RENT, gearIdArg) {
