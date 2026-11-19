@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.umn.gearhub.data.dummy.DummyGears
+import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.data.dummy.DummyPayments
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.util.DateUtils
@@ -45,7 +45,7 @@ fun SuccessScreen(
 ) {
     BackHandler(onBack = onHome)
 
-    val gear = DummyGears.getById(gearId)
+    val gear = GearRepository.getById(gearId)
     val method = DummyPayments.getById(methodId)
     val total = gear?.let { PriceCalculator.total(it.pricePerDay, pickupMillis, returnMillis) } ?: 0
     val days = PriceCalculator.durationDays(pickupMillis, returnMillis)

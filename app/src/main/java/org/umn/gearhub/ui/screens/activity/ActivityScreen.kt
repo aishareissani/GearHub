@@ -28,18 +28,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.umn.gearhub.data.dummy.DummyGears
-import org.umn.gearhub.data.dummy.DummyRentals
+import org.umn.gearhub.data.repository.GearRepository
+import org.umn.gearhub.data.repository.RentalRepository
 import org.umn.gearhub.data.model.Rental
 import org.umn.gearhub.data.model.RentalStatus
 import org.umn.gearhub.navigation.Routes
@@ -47,8 +47,9 @@ import org.umn.gearhub.ui.components.BottomNavBar
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.util.formatDateRange
 import org.umn.gearhub.util.formatRupiah
+import org.umn.gearhub.util.BadgeTone
+import org.umn.gearhub.util.rentalBadge
 import java.time.LocalDate
-import java.time.temporal.ChronoUnit
 
 @Composable
 fun ActivityScreen(
@@ -58,7 +59,7 @@ fun ActivityScreen(
 ) {
     val statuses = RentalStatus.entries
     var selectedTab by rememberSaveable { mutableIntStateOf(0) }
-    val rentals = remember(selectedTab) { DummyRentals.byStatus(statuses[selectedTab]) }
+    val rentals = RentalRepository.byStatus(statuses[selectedTab])
 
     Scaffold(
         modifier = modifier,
@@ -74,7 +75,8 @@ fun ActivityScreen(
             Text(
                 "Aktivitas",
                 style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 24.dp, bottom = 12.dp)
             )
             PrimaryTabRow(
                 selectedTabIndex = selectedTab,
@@ -86,7 +88,7 @@ fun ActivityScreen(
                         onClick = { selectedTab = index },
                         text = {
                             Text(
-                                "${status.label} (${DummyRentals.byStatus(status).size})",
+                                "${status.label} (${RentalRepository.byStatus(status).size})",
                                 style = MaterialTheme.typography.labelLarge
                             )
                         }
@@ -96,7 +98,7 @@ fun ActivityScreen(
             if (rentals.isEmpty()) {
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Text(
-                        "Belum ada transaksi",
+                        if (RentalRepository.loadFailed) "Gagal memuat riwayat sewa" else emptyMessage(statuses[selectedTab]),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -115,9 +117,15 @@ fun ActivityScreen(
     }
 }
 
+private fun emptyMessage(status: RentalStatus) = when (status) {
+    RentalStatus.BERLANGSUNG -> "Belum ada sewa yang berlangsung"
+    RentalStatus.MENUNGGU -> "Tidak ada sewa yang menunggu"
+    RentalStatus.SELESAI -> "Belum ada sewa yang selesai"
+}
+
 @Composable
 private fun RentalCard(rental: Rental, onClick: () -> Unit) {
-    val gear = DummyGears.getById(rental.gearId) ?: return
+    val gear = GearRepository.getById(rental.gearId) ?: return
     Card(
         onClick = onClick,
         shape = MaterialTheme.shapes.medium,
@@ -156,7 +164,7 @@ private fun RentalCard(rental: Rental, onClick: () -> Unit) {
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        formatRupiah(DummyRentals.total(rental)),
+                        formatRupiah(RentalRepository.total(rental)),
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.weight(1f)
                     )
@@ -169,21 +177,17 @@ private fun RentalCard(rental: Rental, onClick: () -> Unit) {
 
 @Composable
 private fun StatusBadge(rental: Rental) {
-    val (container, content) = when (rental.status) {
-        RentalStatus.BERLANGSUNG -> MaterialTheme.colorScheme.primaryContainer to MaterialTheme.colorScheme.onPrimaryContainer
-        RentalStatus.MENUNGGU -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
-        RentalStatus.SELESAI -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    val text = when (rental.status) {
-        RentalStatus.BERLANGSUNG -> {
-            val left = ChronoUnit.DAYS.between(LocalDate.now(), rental.returnDate)
-            if (left > 0) "Sisa $left hari" else "Kembali hari ini"
-        }
-        else -> rental.status.label
+    val badge = rentalBadge(rental.status, rental.returnDate, LocalDate.now())
+    val colors = MaterialTheme.colorScheme
+    val (container, content) = when (badge.tone) {
+        BadgeTone.ACTIVE -> colors.primaryContainer to colors.onPrimaryContainer
+        BadgeTone.WAITING -> colors.secondaryContainer to colors.onSecondaryContainer
+        BadgeTone.DONE -> colors.surfaceVariant to colors.onSurfaceVariant
+        BadgeTone.OVERDUE -> colors.errorContainer to colors.onErrorContainer
     }
     Surface(color = container, contentColor = content, shape = MaterialTheme.shapes.large) {
         Text(
-            text,
+            badge.text,
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
         )

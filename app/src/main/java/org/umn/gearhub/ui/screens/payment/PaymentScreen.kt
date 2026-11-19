@@ -34,15 +34,13 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.delay
-import org.umn.gearhub.data.dummy.DummyGears
+import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.data.dummy.DummyPayments
 import org.umn.gearhub.data.model.PaymentMethod
 import org.umn.gearhub.ui.components.AuthButton
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.util.DateUtils
 import org.umn.gearhub.util.formatRupiah
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun PaymentScreen(
@@ -53,14 +51,10 @@ fun PaymentScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(state.isLoading) {
-        if (state.isLoading) {
-            delay(1000.milliseconds)
-            val gear = state.gear
-            viewModel.onLoadingFinished()
-            if (gear != null) {
-                onPaid(gear.id, state.pickupMillis, state.returnMillis, state.selectedMethodId)
-            }
+    LaunchedEffect(state.isPaid) {
+        val gear = state.gear
+        if (state.isPaid && gear != null) {
+            onPaid(gear.id, state.pickupMillis, state.returnMillis, state.selectedMethodId)
         }
     }
 
@@ -158,6 +152,9 @@ fun PaymentContent(
                 )
                 Text(formatRupiah(state.totalPrice), style = MaterialTheme.typography.titleLarge)
             }
+            state.errorMessage?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+            }
             AuthButton(text = "Bayar", isLoading = state.isLoading, onClick = onPay)
         }
     }
@@ -217,7 +214,7 @@ private fun PaymentContentPreview() {
     GearHubTheme {
         PaymentContent(
             state = PaymentUiState(
-                gear = DummyGears.list.first(),
+                gear = GearRepository.list.first(),
                 pickupMillis = today + DateUtils.DAY_MILLIS,
                 returnMillis = today + 4 * DateUtils.DAY_MILLIS
             ),

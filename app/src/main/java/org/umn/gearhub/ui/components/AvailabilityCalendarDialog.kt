@@ -36,8 +36,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import org.umn.gearhub.data.dummy.DummyBookings
-import org.umn.gearhub.data.dummy.DummyGears
+import org.umn.gearhub.data.repository.BookingRepository
+import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.util.formatMonthTitle
 import java.time.YearMonth
@@ -49,13 +49,13 @@ fun AvailabilityCalendarDialog(
     gearId: Int,
     onDismiss: () -> Unit
 ) {
-    val gear = remember(gearId) { DummyGears.getById(gearId) }
+    val gear = remember(gearId) { GearRepository.getById(gearId) }
     if (gear == null) {
         return
     }
 
     val firstMonth = remember(gear) {
-        val today = DummyBookings.daysFromToday(0)
+        val today = BookingRepository.daysFromToday(0)
         YearMonth.from(if (gear.availableFrom.isAfter(today)) gear.availableFrom else today)
     }
     val lastMonth = remember(gear) {
@@ -149,7 +149,7 @@ fun AvailabilityCalendarDialog(
                                 } else {
                                     DayCell(
                                         day = date.dayOfMonth,
-                                        isAvailable = DummyBookings.isDateAvailable(gearId, date),
+                                        isAvailable = BookingRepository.isDateAvailable(gearId, date),
                                         modifier = Modifier.weight(1f)
                                     )
                                 }

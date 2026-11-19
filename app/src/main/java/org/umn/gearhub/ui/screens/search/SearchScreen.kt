@@ -47,7 +47,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import org.umn.gearhub.data.dummy.DummyGears
+import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.data.dummy.DummyLocations
 import org.umn.gearhub.data.model.GPSLocation
 import org.umn.gearhub.data.model.GearCategory
@@ -77,7 +77,7 @@ fun SearchScreen(
     val selectedCategory = GearCategory.entries.firstOrNull { it.name == selectedCategoryName }
 
     val results = remember(query, selectedCategoryName, selectedLocation, activeLocation) {
-        DummyGears.list
+        GearRepository.list
             .filter { gear ->
                 (selectedCategory == null || gear.category == selectedCategory) &&
                         gear.name.contains(query.trim(), ignoreCase = true)

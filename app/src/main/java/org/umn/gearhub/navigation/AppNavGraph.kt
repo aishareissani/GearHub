@@ -1,12 +1,25 @@
 package org.umn.gearhub.navigation
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -15,6 +28,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import org.umn.gearhub.data.dummy.DummyLocations
+import org.umn.gearhub.data.repository.AuthRepository
+import org.umn.gearhub.data.repository.BookingRepository
+import org.umn.gearhub.data.repository.GearRepository
+import org.umn.gearhub.data.repository.RentalRepository
 import org.umn.gearhub.ui.screens.activity.ActivityScreen
 import org.umn.gearhub.ui.screens.addgear.AddGearScreen
 import org.umn.gearhub.ui.screens.auth.AuthViewModel
@@ -38,6 +55,26 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
     val authViewModel: AuthViewModel = viewModel()
     val locationViewModel: LocationViewModel = viewModel()
     val currentUser by authViewModel.currentUser.collectAsState()
+    var startRoute by remember { mutableStateOf<String?>(null) }
+    var loadFailed by remember { mutableStateOf(false) }
+    var loadAttempt by remember { mutableIntStateOf(0) }
+
+    // Screens read the catalog synchronously, so it must be in memory before any route opens.
+    LaunchedEffect(loadAttempt) {
+        loadFailed = false
+        runCatching {
+            GearRepository.load()
+            BookingRepository.load()
+            AuthRepository.restoreSession()
+        }.onSuccess { user ->
+            user?.let(authViewModel::login)
+            startRoute = if (user != null) Routes.HOME else Routes.LOGIN
+        }.onFailure { loadFailed = true }
+    }
+
+    LaunchedEffect(currentUser) {
+        if (currentUser != null) RentalRepository.loadOrFlag()
+    }
     val locationState by locationViewModel.uiState.collectAsState()
     val context = LocalContext.current
     var selectedLocation by rememberSaveable { mutableStateOf(DummyLocations.DEFAULT) }
@@ -77,7 +114,13 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
         }
     }
 
-    NavHost(navController, startDestination = Routes.LOGIN, modifier = modifier) {
+    val start = startRoute
+    if (start == null) {
+        StartupScreen(loadFailed = loadFailed, onRetry = { loadAttempt++ }, modifier = modifier)
+        return
+    }
+
+    NavHost(navController, startDestination = start, modifier = modifier) {
         composable(Routes.LOGIN) {
             LoginScreen(
                 onLoginSuccess = { user ->
@@ -221,6 +264,23 @@ fun AppNavGraph(modifier: Modifier = Modifier) {
                     }
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun StartupScreen(loadFailed: Boolean, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        if (loadFailed) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text("Gagal memuat data. Cek koneksi internet kamu.", style = MaterialTheme.typography.bodyLarge)
+                TextButton(onClick = onRetry) { Text("Coba lagi") }
+            }
+        } else {
+            CircularProgressIndicator()
         }
     }
 }

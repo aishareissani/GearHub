@@ -1,6 +1,12 @@
-package org.umn.gearhub.data.dummy
+package org.umn.gearhub.data.repository
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import io.github.jan.supabase.postgrest.from
 import org.umn.gearhub.data.model.Booking
+import org.umn.gearhub.data.remote.BookingRow
+import org.umn.gearhub.data.remote.supabase
 import java.time.LocalDate
 
 data class ReturnLimit(
@@ -8,25 +14,17 @@ data class ReturnLimit(
     val blockedBy: LocalDate?
 )
 
-object DummyBookings {
-    private val today: LocalDate = LocalDate.now()
+object BookingRepository {
+    private val today: LocalDate get() = LocalDate.now()
 
     fun daysFromToday(offset: Int): LocalDate = today.plusDays(offset.toLong())
 
-    val list = listOf(
-        Booking(1, 1, daysFromToday(4), daysFromToday(8)),
-        Booking(2, 1, daysFromToday(20), daysFromToday(23)),
-        Booking(3, 2, daysFromToday(2), daysFromToday(5)),
-        Booking(4, 2, daysFromToday(12), daysFromToday(16)),
-        Booking(5, 3, daysFromToday(8), daysFromToday(10)),
-        Booking(6, 4, daysFromToday(3), daysFromToday(6)),
-        Booking(7, 5, daysFromToday(10), daysFromToday(14)),
-        Booking(8, 6, daysFromToday(6), daysFromToday(9)),
-        Booking(9, 6, daysFromToday(25), daysFromToday(28)),
-        Booking(10, 7, daysFromToday(5), daysFromToday(8)),
-        Booking(11, 9, daysFromToday(12), daysFromToday(13)),
-        Booking(12, 10, daysFromToday(7), daysFromToday(11))
-    )
+    var list: List<Booking> by mutableStateOf(emptyList())
+        private set
+
+    suspend fun load() {
+        list = supabase.from("bookings").select().decodeList<BookingRow>().map(BookingRow::toBooking)
+    }
 
     fun isBooked(gearId: Int, date: LocalDate): Boolean =
         list.any {
@@ -35,7 +33,7 @@ object DummyBookings {
 
 
     fun isWithinOwnerSchedule(gearId: Int, start: LocalDate, end: LocalDate): Boolean {
-        val gear = DummyGears.getById(gearId) ?: return false
+        val gear = GearRepository.getById(gearId) ?: return false
         return !start.isBefore(gear.availableFrom) && !end.isAfter(gear.availableUntil)
     }
 
@@ -45,7 +43,7 @@ object DummyBookings {
                 !isBooked(gearId, date)
 
     fun isPickupSelectable(gearId: Int, date: LocalDate): Boolean {
-        val gear = DummyGears.getById(gearId) ?: return false
+        val gear = GearRepository.getById(gearId) ?: return false
         val next = date.plusDays(1)
         return isDateAvailable(gearId, date) &&
                 !next.isAfter(gear.availableUntil) &&
@@ -53,7 +51,7 @@ object DummyBookings {
     }
 
     fun returnLimit(gearId: Int, pickup: LocalDate): ReturnLimit? {
-        val gear = DummyGears.getById(gearId) ?: return null
+        val gear = GearRepository.getById(gearId) ?: return null
         val nextStart = list
             .filter { it.gearId == gearId && it.startDate.isAfter(pickup) }
             .minOfOrNull { it.startDate }

@@ -11,16 +11,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import kotlinx.coroutines.delay
-import org.umn.gearhub.data.dummy.DummyUsers
-import org.umn.gearhub.data.model.User
+import org.umn.gearhub.data.repository.AuthRepository
 import org.umn.gearhub.ui.components.AuthButton
 import org.umn.gearhub.ui.components.AuthScaffold
 import org.umn.gearhub.ui.components.AuthSwitchPrompt
 import org.umn.gearhub.ui.components.AuthTextField
 import org.umn.gearhub.ui.theme.GearHubTheme
 import org.umn.gearhub.util.AuthValidator
-import kotlin.time.Duration.Companion.milliseconds
 
 @Composable
 fun RegisterScreen(
@@ -36,24 +33,30 @@ fun RegisterScreen(
     var passwordTouched by rememberSaveable { mutableStateOf(false) }
     var submitted by rememberSaveable { mutableStateOf(false) }
     var isLoading by rememberSaveable { mutableStateOf(false) }
+    var registerError by rememberSaveable { mutableStateOf<String?>(null) }
 
     val nameError = AuthValidator.validateName(name)
     val emailError = AuthValidator.validateEmail(email)
-        ?: if (DummyUsers.emailExists(email)) "Email sudah terdaftar" else null
     val passwordError = AuthValidator.validatePassword(password)
     val isValid = nameError == null && emailError == null && passwordError == null
 
     LaunchedEffect(isLoading) {
         if (isLoading) {
-            delay(1200.milliseconds)
-            DummyUsers.register(User(name = name, email = email, password = password))
-            onRegisterSuccess()
+            AuthRepository.signUp(name, email, password)
+                .onSuccess { onRegisterSuccess() }
+                .onFailure {
+                    registerError = it.message
+                    isLoading = false
+                }
         }
     }
 
     val submit = {
         submitted = true
-        if (isValid && !isLoading) isLoading = true
+        if (isValid && !isLoading) {
+            registerError = null
+            isLoading = true
+        }
     }
 
     AuthScaffold(
@@ -79,9 +82,10 @@ fun RegisterScreen(
                 onValueChange = {
                     email = it
                     emailTouched = true
+                    registerError = null
                 },
                 placeholder = "nama@kampus.ac.id",
-                errorMessage = if (emailTouched || submitted) emailError else null,
+                errorMessage = (if (emailTouched || submitted) emailError else null) ?: registerError,
                 keyboardType = KeyboardType.Email,
                 imeAction = ImeAction.Next
             )
