@@ -13,3 +13,12 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Catatan presentasi pribadi
+PANDUAN_PRESENTASI_KENNY.md
+
+# Tool lokal
+.archify/
+.audit/
+.serena/
+/.idea/markdown.xml
