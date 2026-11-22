@@ -53,6 +53,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import org.umn.gearhub.data.repository.GearRepository
 import org.umn.gearhub.data.model.GPSLocation
 import org.umn.gearhub.data.model.Gear
@@ -229,8 +230,8 @@ private fun ImageHeader(gear: Gear, onBack: () -> Unit) {
     ) {
         HorizontalPager(state = pagerState, modifier = Modifier.fillMaxSize()) { page ->
             gear.images.getOrNull(page)?.let { res ->
-                Image(
-                    painter = painterResource(res),
+                AsyncImage(
+                    model = res,
                     contentDescription = gear.name,
                     contentScale = ContentScale.Fit,
                     modifier = Modifier

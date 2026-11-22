@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.supabase.auth)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.play.services.location)
+    implementation(libs.coil.compose)
 
     testImplementation(libs.junit)
 

@@ -42,7 +42,7 @@ data class GearRow(
         included = included,
         availableFrom = LocalDate.parse(availableFrom),
         availableUntil = LocalDate.parse(availableUntil),
-        images = images.mapNotNull(::drawableId)
+        images = images.mapNotNull(::parseImageSource)
     )
 
     companion object {
@@ -64,6 +64,11 @@ data class GearRow(
         )
     }
 }
+
+// Parses either HTTP URL strings or local drawable resource names.
+private fun parseImageSource(source: String): Any? =
+    if (source.startsWith("http://") || source.startsWith("https://")) source
+    else drawableId(source)
 
 // Seeded gear photos ship as drawables, so the database stores their resource names.
 private fun drawableId(name: String): Int? =

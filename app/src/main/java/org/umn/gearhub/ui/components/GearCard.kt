@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import org.umn.gearhub.data.model.Gear
 import org.umn.gearhub.util.formatRupiah
 
@@ -59,8 +60,8 @@ fun GearCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.medium)
             ) {
                 gear.imageRes?.let {
-                    Image(
-                        painter = painterResource(it),
+                    AsyncImage(
+                        model = it,
                         contentDescription = gear.name,
                         contentScale = ContentScale.Fit,
                         modifier = Modifier

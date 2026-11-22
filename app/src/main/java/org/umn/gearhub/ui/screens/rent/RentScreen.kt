@@ -45,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import coil.compose.AsyncImage
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -169,8 +170,8 @@ fun RentContent(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(100.dp), contentAlignment = Alignment.Center) {
                     gear.images.firstOrNull()?.let { res ->
-                        Image(
-                            painter = painterResource(res),
+                        AsyncImage(
+                            model = res,
                             contentDescription = gear.name,
                             contentScale = ContentScale.Fit,
                             modifier = Modifier.fillMaxSize()
